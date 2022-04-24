@@ -58,13 +58,16 @@ router.post('/login', async (req, res) => {
       const { accessToken, refreshToken } = buildTokens(user);
       console.log('called token creattion', accessToken, refreshToken);
       setTokens(res, accessToken, refreshToken);
-      res.send({ email: user.email, name: user.name, phone: user.phone });
+      return res.send({
+        email: user.email,
+        name: user.name,
+        phone: user.phone,
+      });
       // res.redirect(`${FRONT_END_URL}`);
       // res.send({ message: 'logged in' });
-    } else {
-      console.log('not user ');
-      res.redirect(`${FRONT_END_URL}`);
     }
+    console.log('not user ');
+    return res.redirect(`${FRONT_END_URL}`);
   } catch (error) {
     console.log('error while logging user, user controller line 49', error);
     return res
@@ -73,7 +76,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-
-router.get("/check", (_, res) => {
-  res.send({ data: "helo" });
-})
+router.get('/check', (_, res) => {
+  res.send({ data: 'helo' });
+});

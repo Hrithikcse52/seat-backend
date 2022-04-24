@@ -3,12 +3,12 @@ import { Schema, model, Document } from 'mongoose';
 export interface UserInput {
   email: string;
   name: {
-    firstName: String;
-    lastName: String;
+    firstName: string;
+    lastName: string;
   };
   phone: {
-    number: Number;
-    verified?: Boolean;
+    number: number;
+    verified?: boolean;
   };
 
   password: string;
