@@ -44,6 +44,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log('login body', req.body);
     if (!(email && password)) {
       return res.status(400).send({ message: 'improper query', data: null });
     }
@@ -62,6 +63,8 @@ router.post('/login', async (req, res) => {
         email: user.email,
         name: user.name,
         phone: user.phone,
+        accessToken,
+        refreshToken,
       });
       // res.redirect(`${FRONT_END_URL}`);
       // res.send({ message: 'logged in' });
@@ -76,6 +79,10 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.get('/check', (_, res) => {
-  res.send({ data: 'helo' });
+router.get('/check', (req, res) => {
+  res.status(401).send({
+    name: { fistName: 'hrithik', lastName: 'asdasd' },
+    phone: { verified: false, number: '7070996410' },
+    email: 'asdasd',
+  });
 });

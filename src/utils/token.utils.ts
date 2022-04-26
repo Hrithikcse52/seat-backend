@@ -23,7 +23,7 @@ const defaultCookieOptions: CookieOptions = {
   httpOnly: true,
   secure: isProd,
   sameSite: isProd ? 'strict' : 'lax',
-  domain: FRONT_END_URL,
+  // domain: FRONT_END_URL,
   path: '/',
 };
 

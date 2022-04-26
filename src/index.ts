@@ -23,7 +23,7 @@ app.use(cookieParser());
 // controllers
 app.use('/user', userController);
 
-app.use('/', (req, res) => {
+app.get('/', (req, res) => {
   res.send({ message: 'server is up and running' });
 });
 app.listen(PORT, () => {
