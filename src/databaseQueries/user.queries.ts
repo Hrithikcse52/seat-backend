@@ -37,11 +37,12 @@ export function getUser(filter: FilterQuery<UserDocument>, options = {}) {
   });
 }
 
-export function incTokenVersion(id: { id: string }) {
+export function incTokenVersion(_id: { _id: string }) {
   return new Promise<UserQueries>((resolve, reject) => {
     userModel.findByIdAndUpdate(
-      id,
+      _id,
       { $inc: { tokenVersion: 1 } },
+      { new: true },
       (err, item) => {
         if (err || !item) {
           return reject({

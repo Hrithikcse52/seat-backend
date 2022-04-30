@@ -1,10 +1,21 @@
 import { Router } from 'express';
 import { hash, compare } from 'bcrypt';
 import { verify } from 'jsonwebtoken';
-import { ACCESS_TOKEN_SECRET, FRONT_END_URL } from '../../config';
-import { createUser, getUser } from '../../databaseQueries/user.queries';
+import {
+  ACCESS_TOKEN_SECRET,
+  FRONT_END_URL,
+  REFRESH_TOKEN_SECRET,
+} from '../../config';
+import {
+  createUser,
+  getUser,
+  incTokenVersion,
+} from '../../databaseQueries/user.queries';
 import { clearTokens, buildTokens, setTokens } from '../../utils/token.utils';
-import { AccessTokenPayload } from '../../types/token.types';
+import {
+  AccessTokenPayload,
+  RefreshTokenPayload,
+} from '../../types/token.types';
 
 export const router = Router();
 
@@ -88,6 +99,34 @@ router.post('/login', async (req, res) => {
   }
 });
 
+router.get('/refresh', async (req, res) => {
+  try {
+    const { refresh } = req.cookies;
+    if (!refresh) return res.status(401).send({ message: 'unauthorized' });
+    const user = verify(
+      refresh,
+      REFRESH_TOKEN_SECRET as string
+    ) as RefreshTokenPayload;
+    console.log('refresh', user.version);
+    const { data: userData } = await getUser({ _id: user.userId });
+    if (!userData) return res.status(404).send({ message: 'user not found' });
+    if (user.version !== userData?.tokenVersion) {
+      return res.status(401).send({ message: 'token is expired relogin' });
+    }
+    const { data: newUser } = await incTokenVersion({ _id: user.userId });
+    console.log('new user version update', newUser);
+    if (!newUser)
+      return res.status(500).send({ message: 'token update failed' });
+    const { accessToken, refreshToken } = buildTokens(newUser);
+    console.log('called token creattion', accessToken, refreshToken);
+    setTokens(res, accessToken, refreshToken);
+    return res.send({ message: 'done' });
+  } catch (error) {
+    console.log('error on refresh token', error);
+    return res.status(500).send({ message: 'user error' });
+  }
+});
+
 router.get('/check', async (req, res) => {
   const cookie = req.cookies;
   console.log('cookiews', cookie);
@@ -97,10 +136,6 @@ router.get('/check', async (req, res) => {
     return res.status(403).send({ user: null });
   }
   console.log('cookie', access);
-  // const user = verify(
-  //   access,
-  //   ACC_TOKEN_SECRET as string
-  // ) as accessTokenPayload;
   const user = verify(
     access,
     ACCESS_TOKEN_SECRET as string
