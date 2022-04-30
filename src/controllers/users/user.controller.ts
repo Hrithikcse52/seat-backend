@@ -1,9 +1,7 @@
 import { Router } from 'express';
 import { hash, compare } from 'bcrypt';
-import { verify } from 'jsonwebtoken';
-import { FRONT_END_URL, REFRESH_TOKEN_SECRET } from '../../config';
+import { FRONT_END_URL } from '../../config';
 import { createUser, getUser } from '../../databaseQueries/user.queries';
-import { RefreshTokenPayload } from '../../types/token.types';
 import { clearTokens, buildTokens, setTokens } from '../../utils/token.utils';
 
 export const router = Router();
@@ -87,22 +85,23 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.get('/check', async (req, res) => {
-  const { refresh } = req.cookies;
-  if (!refresh) {
-    return res.status(403).send({ user: null });
-  }
-  console.log('cookie', refresh);
-  const user = verify(
-    refresh,
-    REFRESH_TOKEN_SECRET as string
-  ) as RefreshTokenPayload;
-  console.log(user);
-  const { data: userData } = await getUser({ _id: user.userId });
-  console.log(userData);
-  return res.send({
-    name: userData?.name,
-    email: userData?.email,
-    id: userData?._id,
-  });
-});
+// router.get('/check', async (req, res) => {
+//   const refresh = req.cookies;
+//   console.log('refresh', refresh);
+//   if (!refresh) {
+//     return res.status(403).send({ user: null });
+//   }
+//   console.log('cookie', refresh);
+//   const user = verify(
+//     refresh,
+//     REFRESH_TOKEN_SECRET as string
+//   ) as RefreshTokenPayload;
+//   console.log(user);
+//   const { data: userData } = await getUser({ _id: user.userId });
+//   console.log(userData);
+//   return res.send({
+//     name: userData?.name,
+//     email: userData?.email,
+//     id: userData?._id,
+//   });
+// });

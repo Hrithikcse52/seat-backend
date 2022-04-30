@@ -20,6 +20,7 @@
   "plugins": ["@typescript-eslint", "prettier", "import"],
   "rules": {
     "import/prefer-default-export": "off",
+    "no-unused-vars": "error",
     "no-underscore-dangle": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
     "prefer-promise-reject-errors": "off",
