@@ -1,16 +1,11 @@
 import { CookieOptions, Response } from 'express';
-import jwt from 'jsonwebtoken';
-import {
-  ACCESS_TOKEN_SECRET,
-  FRONT_END_URL,
-  isProd,
-  REFRESH_TOKEN_SECRET,
-} from '../config';
+import { sign } from 'jsonwebtoken';
+import { isProd, ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from '../config';
 import { UserDocument } from '../models/users/user.model';
 import {
   AccessTokenPayload,
-  Cookies,
   RefreshTokenPayload,
+  Cookies,
 } from '../types/token.types';
 
 enum TokenExpiration {
@@ -38,13 +33,13 @@ const accessTokenCookieOptions: CookieOptions = {
 };
 
 function signAccessToken(payload: AccessTokenPayload) {
-  return jwt.sign(payload, ACCESS_TOKEN_SECRET as string, {
+  return sign(payload, ACCESS_TOKEN_SECRET as string, {
     expiresIn: TokenExpiration.Access,
   });
 }
 
 function signRefreshToken(payload: RefreshTokenPayload) {
-  return jwt.sign(payload, REFRESH_TOKEN_SECRET!, {
+  return sign(payload, REFRESH_TOKEN_SECRET!, {
     expiresIn: TokenExpiration.Refresh,
   });
 }
@@ -69,6 +64,8 @@ export function buildTokens(user: UserDocument) {
 }
 
 export function clearTokens(res: Response) {
-  res.cookie(Cookies.AccessToken, '', { ...defaultCookieOptions, maxAge: 0 });
-  res.cookie(Cookies.RefreshToken, '', { ...defaultCookieOptions, maxAge: 0 });
+  // res.cookie(Cookies.AccessToken, '', { ...defaultCookieOptions, maxAge: 0 });
+  // res.cookie(Cookies.RefreshToken, '', { ...defaultCookieOptions, maxAge: 0 });
+  res.clearCookie(Cookies.AccessToken, { path: defaultCookieOptions.path });
+  res.clearCookie(Cookies.RefreshToken, { path: defaultCookieOptions.path });
 }

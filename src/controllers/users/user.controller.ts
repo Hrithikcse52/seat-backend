@@ -1,8 +1,10 @@
 import { Router } from 'express';
-import { compare, hash } from 'bcrypt';
+import { hash, compare } from 'bcrypt';
+import { verify } from 'jsonwebtoken';
+import { FRONT_END_URL, REFRESH_TOKEN_SECRET } from '../../config';
 import { createUser, getUser } from '../../databaseQueries/user.queries';
-import { buildTokens, setTokens } from '../../utils/token.utils';
-import { FRONT_END_URL } from '../../config';
+import { RefreshTokenPayload } from '../../types/token.types';
+import { clearTokens, buildTokens, setTokens } from '../../utils/token.utils';
 
 export const router = Router();
 
@@ -41,6 +43,11 @@ router.post('/register', async (req, res) => {
   }
 });
 
+router.get('/logout', async (req, res) => {
+  clearTokens(res);
+  res.status(201).send({ user: null });
+});
+
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -60,11 +67,12 @@ router.post('/login', async (req, res) => {
       console.log('called token creattion', accessToken, refreshToken);
       setTokens(res, accessToken, refreshToken);
       return res.send({
+        id: user._id,
         email: user.email,
         name: user.name,
         phone: user.phone,
-        accessToken,
-        refreshToken,
+        // accessToken,
+        // refreshToken,
       });
       // res.redirect(`${FRONT_END_URL}`);
       // res.send({ message: 'logged in' });
@@ -79,10 +87,22 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.get('/check', (req, res) => {
-  res.status(401).send({
-    name: { fistName: 'hrithik', lastName: 'asdasd' },
-    phone: { verified: false, number: '7070996410' },
-    email: 'asdasd',
+router.get('/check', async (req, res) => {
+  const { refresh } = req.cookies;
+  if (!refresh) {
+    return res.status(403).send({ user: null });
+  }
+  console.log('cookie', refresh);
+  const user = verify(
+    refresh,
+    REFRESH_TOKEN_SECRET as string
+  ) as RefreshTokenPayload;
+  console.log(user);
+  const { data: userData } = await getUser({ _id: user.userId });
+  console.log(userData);
+  return res.send({
+    name: userData?.name,
+    email: userData?.email,
+    id: userData?._id,
   });
 });

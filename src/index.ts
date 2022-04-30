@@ -3,8 +3,9 @@ import 'dotenv/config';
 import { connect } from 'mongoose';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import { MONGO_URI, FRONT_END_URL, PORT } from './config';
 import { router as userController } from './controllers/users/user.controller';
-import { FRONT_END_URL, MONGO_URI, PORT } from './config';
+// import { FRONT_END_URL, MONGO_URI, PORT } from './config';
 
 const app: Application = express();
 (async () => {
