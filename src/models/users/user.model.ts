@@ -16,6 +16,7 @@ export interface UserInput {
 
 export interface UserDocument extends UserInput, Document {
   tokenVersion: number;
+  role: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -52,6 +53,11 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: true,
+    },
+    role: {
+      type: String,
+      enum: ['user', 'manager', 'admin', 'super_admin'],
+      default: 'user',
     },
   },
   { timestamps: true }

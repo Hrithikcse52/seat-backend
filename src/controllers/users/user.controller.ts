@@ -1,8 +1,10 @@
 import { Router } from 'express';
 import { hash, compare } from 'bcrypt';
-import { FRONT_END_URL } from '../../config';
+import { verify } from 'jsonwebtoken';
+import { ACCESS_TOKEN_SECRET, FRONT_END_URL } from '../../config';
 import { createUser, getUser } from '../../databaseQueries/user.queries';
 import { clearTokens, buildTokens, setTokens } from '../../utils/token.utils';
+import { AccessTokenPayload } from '../../types/token.types';
 
 export const router = Router();
 
@@ -69,6 +71,7 @@ router.post('/login', async (req, res) => {
         email: user.email,
         name: user.name,
         phone: user.phone,
+        role: user.role,
         // accessToken,
         // refreshToken,
       });
@@ -85,23 +88,34 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// router.get('/check', async (req, res) => {
-//   const refresh = req.cookies;
-//   console.log('refresh', refresh);
-//   if (!refresh) {
-//     return res.status(403).send({ user: null });
-//   }
-//   console.log('cookie', refresh);
-//   const user = verify(
-//     refresh,
-//     REFRESH_TOKEN_SECRET as string
-//   ) as RefreshTokenPayload;
-//   console.log(user);
-//   const { data: userData } = await getUser({ _id: user.userId });
-//   console.log(userData);
-//   return res.send({
-//     name: userData?.name,
-//     email: userData?.email,
-//     id: userData?._id,
-//   });
-// });
+router.get('/check', async (req, res) => {
+  const cookie = req.cookies;
+  console.log('cookiews', cookie);
+  const { access } = cookie;
+  console.log('access', access);
+  if (!access) {
+    return res.status(403).send({ user: null });
+  }
+  console.log('cookie', access);
+  // const user = verify(
+  //   access,
+  //   ACC_TOKEN_SECRET as string
+  // ) as accessTokenPayload;
+  const user = verify(
+    access,
+    ACCESS_TOKEN_SECRET as string
+  ) as AccessTokenPayload;
+  console.log(user);
+  const { data: userData } = await getUser({ _id: user.userId });
+  console.log(userData);
+  if (!userData || (userData.role !== 'admin' && userData.role !== 'manager')) {
+    return res.status(403).send({ message: 'forbidden' });
+  }
+  return res.send({
+    name: userData?.name,
+    email: userData?.email,
+    id: userData?._id,
+    role: userData?.role,
+    phone: userData.phone,
+  });
+});
