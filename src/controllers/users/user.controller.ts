@@ -1,21 +1,16 @@
 import { Router } from 'express';
 import { hash, compare } from 'bcrypt';
 import { verify } from 'jsonwebtoken';
-import {
-  ACCESS_TOKEN_SECRET,
-  FRONT_END_URL,
-  REFRESH_TOKEN_SECRET,
-} from '../../config';
+import { FRONT_END_URL, REFRESH_TOKEN_SECRET } from '../../config';
 import {
   createUser,
   getUser,
   incTokenVersion,
 } from '../../databaseQueries/user.queries';
 import { clearTokens, buildTokens, setTokens } from '../../utils/token.utils';
-import {
-  AccessTokenPayload,
-  RefreshTokenPayload,
-} from '../../types/token.types';
+import { RefreshTokenPayload } from '../../types/token.types';
+import { isAuth } from '../../middlewares/auth.middleware';
+import { ReqMod } from '../../types/util.types';
 
 export const router = Router();
 
@@ -136,35 +131,17 @@ router.get('/refresh', async (req, res) => {
   }
 });
 
-router.get('/check', async (req, res) => {
-  const cookie = req.cookies;
-  console.log('cookiews', cookie);
-  const { access, refresh } = cookie;
-  console.log('access', access);
-  if (!access && refresh) {
-    console.log('refresh the tokens');
-    return res.status(403).send({ user: null });
-  }
-  if (!(access && refresh)) {
-    console.log('dont refresh the tokens');
+router.get('/check', isAuth, async (req: ReqMod, res) => {
+  const { user } = req;
+  if (!user) {
+    console.log('no user in check');
     return res.status(401).send({ message: 'do login' });
   }
-  console.log('cookie', access);
-  const user = verify(
-    access,
-    ACCESS_TOKEN_SECRET as string
-  ) as AccessTokenPayload;
-  console.log(user);
-  const { data: userData } = await getUser({ _id: user.userId });
-  console.log(userData);
-  if (!userData || (userData.role !== 'admin' && userData.role !== 'manager')) {
-    return res.status(401).send({ message: 'forbidden' });
-  }
   return res.send({
-    name: userData?.name,
-    email: userData?.email,
-    id: userData?._id,
-    role: userData?.role,
-    phone: userData.phone,
+    name: user.name,
+    email: user.email,
+    id: user._id,
+    role: user.role,
+    phone: user.phone,
   });
 });
