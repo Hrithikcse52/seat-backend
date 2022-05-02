@@ -110,12 +110,16 @@ router.get('/refresh', async (req, res) => {
     console.log('refresh', user.version);
     // desearelize the token
     const { data: userData } = await getUser({ _id: user.userId });
+    console.log('user data', userData);
     if (!userData) return res.status(404).send({ message: 'user not found' });
     // check if the version of token matches the prev refresh token
 
     if (user.version !== userData?.tokenVersion) {
       return res.status(401).send({ message: 'token is expired relogin' });
     }
+    console.log(
+      "token's version is same inctoken version and create new token"
+    );
 
     const { data: newUser } = await incTokenVersion({ _id: user.userId });
     console.log('new user version update', newUser);
@@ -135,10 +139,15 @@ router.get('/refresh', async (req, res) => {
 router.get('/check', async (req, res) => {
   const cookie = req.cookies;
   console.log('cookiews', cookie);
-  const { access } = cookie;
+  const { access, refresh } = cookie;
   console.log('access', access);
-  if (!access) {
+  if (!access && refresh) {
+    console.log('refresh the tokens');
     return res.status(403).send({ user: null });
+  }
+  if (!(access && refresh)) {
+    console.log('dont refresh the tokens');
+    return res.status(401).send({ message: 'do login' });
   }
   console.log('cookie', access);
   const user = verify(
