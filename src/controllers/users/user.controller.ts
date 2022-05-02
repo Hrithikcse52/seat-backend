@@ -108,15 +108,20 @@ router.get('/refresh', async (req, res) => {
       REFRESH_TOKEN_SECRET as string
     ) as RefreshTokenPayload;
     console.log('refresh', user.version);
+    // desearelize the token
     const { data: userData } = await getUser({ _id: user.userId });
     if (!userData) return res.status(404).send({ message: 'user not found' });
+    // check if the version of token matches the prev refresh token
+
     if (user.version !== userData?.tokenVersion) {
       return res.status(401).send({ message: 'token is expired relogin' });
     }
+
     const { data: newUser } = await incTokenVersion({ _id: user.userId });
     console.log('new user version update', newUser);
     if (!newUser)
       return res.status(500).send({ message: 'token update failed' });
+
     const { accessToken, refreshToken } = buildTokens(newUser);
     console.log('called token creattion', accessToken, refreshToken);
     setTokens(res, accessToken, refreshToken);
@@ -144,7 +149,7 @@ router.get('/check', async (req, res) => {
   const { data: userData } = await getUser({ _id: user.userId });
   console.log(userData);
   if (!userData || (userData.role !== 'admin' && userData.role !== 'manager')) {
-    return res.status(403).send({ message: 'forbidden' });
+    return res.status(401).send({ message: 'forbidden' });
   }
   return res.send({
     name: userData?.name,
