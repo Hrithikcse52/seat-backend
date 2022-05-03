@@ -16,8 +16,8 @@ export const router = Router();
 
 router.post('/register', async (req, res) => {
   try {
-    const { firstName, lastName, email, password, phoneNumber } = req.body;
-    if (!(firstName && lastName && email && password && phoneNumber)) {
+    const { firstName, lastName, email, password, phone } = req.body;
+    if (!(firstName && lastName && email && password && phone)) {
       return res.status(400).send({ message: 'improper query', data: null });
     }
     const encryptPass = await hash(password, 10);
@@ -26,13 +26,15 @@ router.post('/register', async (req, res) => {
       data: user,
       message,
     } = await createUser({
-      email,
+      email: {
+        id: email,
+      },
       name: {
         firstName,
         lastName,
       },
       phone: {
-        number: phoneNumber,
+        number: phone,
       },
       password: encryptPass,
     });
@@ -61,7 +63,7 @@ router.post('/login', async (req, res) => {
     if (!(email && password)) {
       return res.status(400).send({ message: 'improper query', data: null });
     }
-    const { code, data: user, message } = await getUser({ email });
+    const { code, data: user, message } = await getUser({ 'email.id': email });
     if (code !== 200 || !user) {
       return res.status(code).send({ message, data: user });
     }

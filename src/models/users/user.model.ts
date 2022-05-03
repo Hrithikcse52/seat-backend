@@ -1,20 +1,24 @@
 import { Schema, model, Document } from 'mongoose';
 
 export interface UserInput {
-  email: string;
+  email: {
+    id: string;
+  };
   name: {
     firstName: string;
     lastName: string;
   };
   phone: {
     number: number;
-    verified?: boolean;
   };
-
   password: string;
 }
 
-export interface UserDocument extends UserInput, Document {
+export interface UserDocument
+  extends Omit<UserInput, 'email' | 'phone'>,
+    Document {
+  email: { id: string; verified: boolean };
+  phone: { number: number; vefified: boolean };
   tokenVersion: number;
   role: string;
   createdAt: Date;
@@ -32,9 +36,15 @@ const userSchema = new Schema(
       },
     },
     email: {
-      type: String,
-      unique: true,
-      required: true,
+      id: {
+        type: String,
+        unique: true,
+        required: true,
+      },
+      verified: {
+        type: Boolean,
+        default: false,
+      },
     },
     phone: {
       number: {

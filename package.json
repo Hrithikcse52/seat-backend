@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --config nodemon-server.json",
+    "start:dev": "nodemon --config nodemon-server.json",
     "build": "tsc",
     "watch": "rm -rvf dist && tsc -w",
     "start:prod": "node dist/index.js",
-    "start:dev": "nodemon dist/index.js",
+    "dev": "nodemon dist/index.js",
     "check-types": "tsc --pretty --noEmit",
     "check-format": "prettier --check .",
     "check-lint": "eslint . --ext ts  --ext js",
