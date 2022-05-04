@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Response, Router } from 'express';
 import { hash, compare } from 'bcrypt';
 import { verify } from 'jsonwebtoken';
 import { FRONT_END_URL, REFRESH_TOKEN_SECRET } from '../../config';
@@ -96,10 +96,16 @@ router.post('/login', async (req, res) => {
   }
 });
 
+function handleRefreshError(res: Response, status: number, message: string) {
+  clearTokens(res);
+  return res.status(status).send({ message });
+}
+
 router.get('/refresh', async (req, res) => {
   try {
     const { refresh } = req.cookies;
-    if (!refresh) return res.status(401).send({ message: 'unauthorized' });
+    // if (!refresh) return res.status(401).send({ message: 'unauthorized' });
+    if (!refresh) return handleRefreshError(res, 401, 'unauthoized');
     const user = verify(
       refresh,
       REFRESH_TOKEN_SECRET as string
@@ -108,11 +114,13 @@ router.get('/refresh', async (req, res) => {
     // desearelize the token
     const { data: userData } = await getUser({ _id: user.userId });
     console.log('user data', userData);
-    if (!userData) return res.status(404).send({ message: 'user not found' });
+    // if (!userData) return res.status(404).send({ message: 'user not found' });
+    if (!userData) return handleRefreshError(res, 404, 'user not found');
     // check if the version of token matches the prev refresh token
 
     if (user.version !== userData?.tokenVersion) {
-      return res.status(401).send({ message: 'token is expired relogin' });
+      // return res.status(401).send({ message: 'token is expired relogin' });
+      return handleRefreshError(res, 401, 'expired relogin');
     }
     console.log(
       "token's version is same inctoken version and create new token"
@@ -121,7 +129,8 @@ router.get('/refresh', async (req, res) => {
     const { data: newUser } = await incTokenVersion({ _id: user.userId });
     console.log('new user version update', newUser);
     if (!newUser)
-      return res.status(500).send({ message: 'token update failed' });
+      // return res.status(500).send({ message: 'token update failed' });
+      return handleRefreshError(res, 500, 'token update failed');
 
     const { accessToken, refreshToken } = buildTokens(newUser);
     console.log('called token creattion', accessToken, refreshToken);
@@ -129,7 +138,8 @@ router.get('/refresh', async (req, res) => {
     return res.send({ message: 'done' });
   } catch (error) {
     console.log('error on refresh token', error);
-    return res.status(500).send({ message: 'user error' });
+    // return res.status(500).send({ message: 'user error' });
+    return handleRefreshError(res, 500, 'user error');
   }
 });
 
