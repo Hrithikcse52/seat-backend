@@ -1,0 +1,45 @@
+name: Develop
+on:
+  push:
+    branches: [ develop ]
+  workflow_dispatch:
+env:
+  DEMO_SSH_KEY: ${{ secrets.DEMO_SSH_KEY }}
+  ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+  REFRESH_TOKEN_SECRET: ${{ secrets.REFRESH_TOKEN_SECRET }}
+  MONGO_URI: ${{ secrets.MONGO_URI }}
+  FRONT_END_URL: ${{ secrets.FRONT_END_URL }}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Create .env files
+        run: |
+          echo "NODE_ENV=production" > .env 
+          echo "ACCESS_TOKEN_SECRET=$ACCESS_TOKEN_SECRET" >> .env
+          echo "REFRESH_TOKEN_SECRET=$REFRESH_TOKEN_SECRET" >> .env
+          echo "MONGO_URI=$MONGO_URI" >> .env
+          echo "FRONT_END_URL=$FRONT_END_URL" >> .env
+          echo "PORT=3000" >> .env
+      - name: Installing packages
+        run: npm i
+#       - name: Installing Test & Lint
+#         run: npm run test-all
+      - name: build
+        run: npm run build
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: unnecessary
+          if_key_exists: replace
+      - name: Adding Known Hosts
+        run: ssh-keyscan -H ${{ secrets.SSH_HOST }}  >> ~/.ssh/known_hosts
+      - name: Deploy with rsync
+        run: rsync -avz -e "ssh -p 22" . ubuntu@${{ secrets.SSH_HOST }}:/home/ubuntu/seat-backend/
+      - name: restart node server
+        run: ssh ubuntu@${{ secrets.SSH_HOST }} pm2 restart all 
