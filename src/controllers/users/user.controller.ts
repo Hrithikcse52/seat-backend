@@ -26,16 +26,12 @@ router.post('/register', async (req, res) => {
       data: user,
       message,
     } = await createUser({
-      email: {
-        id: email,
-      },
+      email,
       name: {
         firstName,
         lastName,
       },
-      phone: {
-        number: phone,
-      },
+      phone,
       password: encryptPass,
     });
     if (code !== 200) {
@@ -63,7 +59,7 @@ router.post('/login', async (req, res) => {
     if (!(email && password)) {
       return res.status(400).send({ message: 'improper query', data: null });
     }
-    const { code, data: user, message } = await getUser({ 'email.id': email });
+    const { code, data: user, message } = await getUser({ email });
     if (code !== 200 || !user) {
       return res.status(code).send({ message, data: user });
     }

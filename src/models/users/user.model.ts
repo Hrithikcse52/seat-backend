@@ -1,29 +1,25 @@
 import { Schema, model, Document } from 'mongoose';
 
 export interface UserInput {
-  email: {
-    id: string;
-  };
+  email: string;
   name: {
     firstName: string;
     lastName: string;
   };
-  phone: {
-    number: number;
-  };
+  phone: number;
   password: string;
 }
 
-export interface UserDocument
-  extends Omit<UserInput, 'email' | 'phone'>,
-    Document {
-  email: { id: string; verified: boolean };
-  phone: { number: number; vefified: boolean };
+export interface UserDocument extends UserInput, Document {
+  // email: { id: string; verified: boolean };
+  // phone: { number: number; vefified: boolean };
+  status: string;
   tokenVersion: number;
   role: string;
   createdAt: Date;
   updatedAt: Date;
 }
+// status :{ phone :false,email:false}
 
 const userSchema = new Schema(
   {
@@ -36,25 +32,14 @@ const userSchema = new Schema(
       },
     },
     email: {
-      id: {
-        type: String,
-        unique: true,
-        required: true,
-      },
-      verified: {
-        type: Boolean,
-        default: false,
-      },
+      type: String,
+      unique: true,
+      required: true,
     },
     phone: {
-      number: {
-        type: Number,
-        unique: true,
-      },
-      verified: {
-        type: Boolean,
-        default: false,
-      },
+      type: Number,
+      unique: true,
+      required: true,
     },
     tokenVersion: {
       type: Number,
@@ -63,6 +48,16 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: true,
+    },
+    status: {
+      type: String,
+      enum: [
+        'active',
+        'email_not_verified',
+        'phone_not_verified',
+        'not_verified',
+      ],
+      default: 'not_verified',
     },
     role: {
       type: String,
