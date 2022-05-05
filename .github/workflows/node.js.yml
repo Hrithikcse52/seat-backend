@@ -1,21 +1,9 @@
-
-
-
-
-
-
-
-
-
-
-name: CI
-
-# Controls when the workflow will run
+name: Develop
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ InstagramSpace ]
-  # Allows you to run this workflow manually from the Actions tab
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
   workflow_dispatch:
 env:
   DEMO_SSH_KEY: ${{ secrets.DEMO_SSH_KEY }}
@@ -23,12 +11,8 @@ env:
   REFRESH_TOKEN_SECRET: ${{ secrets.REFRESH_TOKEN_SECRET }}
   MONGO_URI: ${{ secrets.MONGO_URI }}
   FRONT_END_URL: ${{ secrets.FRONT_END_URL }}
-  
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
