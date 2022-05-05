@@ -2,8 +2,6 @@ name: Develop
 on:
   push:
     branches: [ develop ]
-  pull_request:
-    branches: [ develop ]
   workflow_dispatch:
 env:
   DEMO_SSH_KEY: ${{ secrets.DEMO_SSH_KEY }}
