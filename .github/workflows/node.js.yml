@@ -22,15 +22,17 @@ jobs:
       - name: Create .env files
         run: |
           echo "NODE_ENV=production" > .env 
-          echo "ACCESS_TOKEN_SECRET" >> .env
-          echo "REFRESH_TOKEN_SECRET" >> .env
-          echo "MONGO_URI" >> .env
-          echo "FRONT_END_URL" >> .env
+          echo "ACCESS_TOKEN_SECRET=$ACCESS_TOKEN_SECRET" >> .env
+          echo "REFRESH_TOKEN_SECRET=$REFRESH_TOKEN_SECRET" >> .env
+          echo "MONGO_URI=$MONGO_URI" >> .env
+          echo "FRONT_END_URL=$FRONT_END_URL" >> .env
           echo "PORT=3000" >> .env
       - name: Installing packages
         run: npm i
 #       - name: Installing Test & Lint
 #         run: npm run test-all
+      - name: build
+        run: npm run build
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
         with:
