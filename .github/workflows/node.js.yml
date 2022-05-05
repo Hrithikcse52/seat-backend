@@ -29,8 +29,8 @@ jobs:
           echo "PORT=3000" >> .env
       - name: Installing packages
         run: npm i
-      - name: Installing Test & Lint
-        run: npm run test-all
+#       - name: Installing Test & Lint
+#         run: npm run test-all
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
         with:
