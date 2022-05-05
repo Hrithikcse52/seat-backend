@@ -1,7 +1,7 @@
 name: Develop
 on:
   push:
-    branches: [ develop ]
+    branches: [develop]
   workflow_dispatch:
 env:
   DEMO_SSH_KEY: ${{ secrets.DEMO_SSH_KEY }}
@@ -27,8 +27,8 @@ jobs:
           echo "PORT=3000" >> .env
       - name: Installing packages
         run: npm i
-#       - name: Installing Test & Lint
-#         run: npm run test-all
+      - name: Installing Test & Lint
+        run: npm run test-all
       - name: build
         run: npm run build
       - name: Install SSH Key
@@ -42,4 +42,4 @@ jobs:
       - name: Deploy with rsync
         run: rsync -avz -e "ssh -p 22" . ubuntu@${{ secrets.SSH_HOST }}:/home/ubuntu/seat-backend/
       - name: restart node server
-        run: ssh ubuntu@${{ secrets.SSH_HOST }} pm2 restart all 
+        run: ssh ubuntu@${{ secrets.SSH_HOST }} pm2 restart all
