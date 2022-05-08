@@ -1,5 +1,31 @@
 import { Schema, model } from 'mongoose';
 
+interface PermType {
+  user: Schema.Types.ObjectId;
+  role: string;
+}
+
+export interface WorkspaceInput {
+  name: string;
+  description: string;
+  address: string;
+  membership: {
+    amount: number;
+    currenct: string;
+  };
+  permission: PermType[];
+  createdBy: Schema.Types.ObjectId;
+  modifiedBy: Schema.Types.ObjectId;
+}
+
+export interface WorkspaceDocument extends WorkspaceInput, Document {
+  // email: { id: string; verified: boolean };
+  // phone: { number: number; vefified: boolean };
+  createdAt: Date;
+  updatedAt: Date;
+}
+//
+
 const workSpaceSchema = new Schema(
   {
     name: {
@@ -15,14 +41,14 @@ const workSpaceSchema = new Schema(
       maxlength: [300, 'Must be under 300 characters long'],
       required: true,
     },
-    location: {
+    address: {
       type: String,
     },
     memberShip: {
       currency: String,
       amount: Number,
     },
-    permissions: [
+    permission: [
       {
         user: {
           type: Schema.Types.ObjectId,

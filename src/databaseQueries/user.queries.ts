@@ -9,6 +9,7 @@ export interface UserQueries {
 
 export function createUser(doc: UserInput) {
   return new Promise<UserQueries>((resolve, reject) => {
+    console.log('doc ', doc);
     userModel.create(doc, (err, item) => {
       if (err || !item) {
         return reject({

@@ -34,10 +34,10 @@ router.post('/register', async (req, res) => {
       phone,
       password: encryptPass,
     });
+    console.log(code, user, message, 'user 35');
     if (code !== 200) {
       return res.status(code).send({ message, data: user });
     }
-    console.log(code, user, message, 'user 35');
     return res.send(user);
   } catch (error) {
     console.log('error while creating user, user controller line 35', error);

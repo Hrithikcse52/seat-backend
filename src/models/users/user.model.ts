@@ -6,7 +6,7 @@ export interface UserInput {
     firstName: string;
     lastName: string;
   };
-  phone: number;
+  phone: string;
   password: string;
 }
 
@@ -37,7 +37,7 @@ const userSchema = new Schema(
       required: true,
     },
     phone: {
-      type: Number,
+      type: String,
       unique: true,
       required: true,
     },
