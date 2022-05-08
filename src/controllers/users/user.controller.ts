@@ -106,7 +106,7 @@ router.get('/refresh', async (req, res) => {
       refresh,
       REFRESH_TOKEN_SECRET as string
     ) as RefreshTokenPayload;
-    console.log('refresh', user.version);
+    console.log('refresh', user);
     // desearelize the token
     const { data: userData } = await getUser({ _id: user.userId });
     console.log('user data', userData);
@@ -151,5 +151,6 @@ router.get('/check', isAuth, async (req: ReqMod, res) => {
     id: user._id,
     role: user.role,
     phone: user.phone,
+    status: user.status,
   });
 });

@@ -15,7 +15,9 @@ const workSpaceSchema = new Schema(
       maxlength: [300, 'Must be under 300 characters long'],
       required: true,
     },
-    location: String,
+    location: {
+      type: String,
+    },
     memberShip: {
       currency: String,
       amount: Number,
