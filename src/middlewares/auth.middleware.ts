@@ -18,8 +18,6 @@ export async function isAuth(req: ReqMod, res: Response, next: NextFunction) {
     console.log('dont refresh the tokens');
     return res.status(401).send({ message: 'do login' });
   }
-  console.log('cookie', access);
-
   try {
     const user = verify(
       access,
@@ -64,6 +62,13 @@ export async function isAdmin(req: ReqMod, res: Response, next: NextFunction) {
     return res
       .status(500)
       .send({ user: null, message: 'Something went wrong!' });
+  }
+}
+
+// eslint-disable-next-line consistent-return
+export function handleUser(req: ReqMod, res: Response) {
+  if (!req.user) {
+    return res.status(401).send({ user: null, message: 'do login' });
   }
 }
 

@@ -19,14 +19,13 @@ export interface WorkspaceInput {
 }
 
 export interface WorkspaceDocument extends WorkspaceInput, Document {
-  // email: { id: string; verified: boolean };
-  // phone: { number: number; vefified: boolean };
+  status: string;
   createdAt: Date;
   updatedAt: Date;
 }
 //
 
-const workSpaceSchema = new Schema(
+const workSpaceSchema = new Schema<WorkspaceDocument>(
   {
     name: {
       type: String,
@@ -34,7 +33,6 @@ const workSpaceSchema = new Schema(
       maxlength: [45, 'Must be under 46 characters long'],
       required: true,
     },
-
     description: {
       type: String,
       minlength: [5, 'Must be over 4 characters long'],
@@ -44,15 +42,25 @@ const workSpaceSchema = new Schema(
     address: {
       type: String,
     },
-    memberShip: {
-      currency: String,
+    status: {
+      type: String,
+      enum: [
+        'active',
+        'email_not_verified',
+        'phone_not_verified',
+        'not_verified',
+      ],
+      default: 'not_verified',
+    },
+    membership: {
       amount: Number,
+      currency: String,
     },
     permission: [
       {
         user: {
           type: Schema.Types.ObjectId,
-          ref: 'user',
+          ref: 'users',
           required: true,
         },
         role: {
@@ -64,12 +72,12 @@ const workSpaceSchema = new Schema(
     ],
     createdBy: {
       type: Schema.Types.ObjectId,
-      ref: 'user',
+      ref: 'users',
       required: true,
     },
     modifiedBy: {
       type: Schema.Types.ObjectId,
-      ref: 'user',
+      ref: 'users',
       required: true,
     },
   },
@@ -78,5 +86,5 @@ const workSpaceSchema = new Schema(
 
 // user -> library
 
-const workSpaceModel = model('workspace', workSpaceSchema);
+const workSpaceModel = model<WorkspaceDocument>('workspaces', workSpaceSchema);
 export default workSpaceModel;

@@ -10,9 +10,13 @@ import { WorkspaceInput } from '../../models/workspace/workspace.model';
 
 export const router = Router();
 
-router.get('/', async (req, res) => {
-  const data = await getAllWorkspace({});
-  res.send({ message: 'welcome', data });
+router.get('/', isAuth, async (req: ReqMod, res) => {
+  const { user } = req;
+  if (!user) {
+    return res.status(401).send({ user: null, message: 'Login' });
+  }
+  const data = await getAllWorkspace({ 'permission.user': user._id });
+  return res.send(data);
 });
 
 router.post('/', isAuth, async (req: ReqMod, res) => {

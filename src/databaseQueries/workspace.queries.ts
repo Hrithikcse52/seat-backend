@@ -1,3 +1,4 @@
+import { FilterQuery } from 'mongoose';
 import workSpaceModel, {
   WorkspaceDocument,
   WorkspaceInput,
@@ -20,7 +21,7 @@ export function createWorkSpace(doc: WorkspaceInput) {
   });
 }
 
-export async function getAllWorkspace(filter: object) {
+export async function getAllWorkspace(filter: FilterQuery<WorkspaceDocument>) {
   try {
     const data = await workSpaceModel.find(filter).exec();
     console.log('all workspace', data);
