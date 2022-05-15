@@ -19,6 +19,12 @@ router.get('/', isAuth, async (req: ReqMod, res) => {
   return res.send(data);
 });
 
+router.get('/explore', async (_, res) => {
+  const data = await getAllWorkspace({ status: 'active' });
+  console.log('data', data);
+  return res.send(data);
+});
+
 router.post('/', isAuth, async (req: ReqMod, res) => {
   try {
     const { name, description, location, membership } = req.body;

@@ -23,7 +23,8 @@ export function createWorkSpace(doc: WorkspaceInput) {
 
 export async function getAllWorkspace(filter: FilterQuery<WorkspaceDocument>) {
   try {
-    const data = await workSpaceModel.find(filter).exec();
+    console.log('filter', filter);
+    const data = await workSpaceModel.find(filter).lean().exec();
     console.log('all workspace', data);
     return data;
   } catch (err) {
