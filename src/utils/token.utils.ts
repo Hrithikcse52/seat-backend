@@ -9,7 +9,7 @@ import {
 } from '../types/token.types';
 
 enum TokenExpiration {
-  Access = 60,
+  Access = 60 * 60 * 6,
   Refresh = 7 * 24 * 60 * 60,
   RefreshIfLessThan = 4 * 24 * 60 * 60,
 }
