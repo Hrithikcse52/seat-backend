@@ -1,8 +1,9 @@
-import { Router } from 'express';
+import { Response, Router } from 'express';
 import mongoose from 'mongoose';
 import {
   createWorkSpace,
   getAllWorkspace,
+  getWorkspace,
 } from '../../databaseQueries/workspace.queries';
 import { isAuth } from '../../middlewares/auth.middleware';
 import { ReqMod } from '../../types/util.types';
@@ -20,14 +21,17 @@ router.get('/', isAuth, async (req: ReqMod, res) => {
 });
 
 router.get('/explore', async (_, res) => {
-  const data = await getAllWorkspace({ status: 'active' });
+  const data = await getAllWorkspace({
+    status: 'active',
+    $or: [{ type: 'public' }, { type: 'approval_based' }],
+  });
   console.log('data', data);
   return res.send(data);
 });
 
 router.post('/', isAuth, async (req: ReqMod, res) => {
   try {
-    const { name, description, location, membership } = req.body;
+    const { name, description, location, membership, type } = req.body;
     const { user } = req;
     console.log(
       '🚀 ~ file: workspace.controller.ts ~ line 13 ~ router.post ~  name, description, location, membership ',
@@ -40,15 +44,16 @@ router.post('/', isAuth, async (req: ReqMod, res) => {
     if (!user) {
       return res.status(401).send({ user: null, message: 'login' });
     }
-
+    // TODO: Name should be unique do not run mongodb validation run self validation.
     const permission = [
       { user: user._id as mongoose.Schema.Types.ObjectId, role: 'admin' },
     ];
     const payload: WorkspaceInput = {
       name,
       description,
+      type,
       address: location,
-      membership,
+      // membership,
       permission,
       createdBy: user._id,
       modifiedBy: user._id,
@@ -69,4 +74,22 @@ router.post('/', isAuth, async (req: ReqMod, res) => {
     );
     return res.send({ message: 'received' });
   }
+});
+
+router.get('/:id', isAuth, async (req: ReqMod, res: Response) => {
+  const { id } = req.params;
+  console.log('id', id);
+  const data = await getWorkspace({ _id: id });
+
+  if (!data) {
+    return res.status(500).send({ message: 'Something Went Wrong' });
+  }
+  // const responseData = {
+  //   _id: data._id,
+  //   name: data.name,
+  //   description: data.description,
+  //   address: data.address,
+  //   type: data.type,
+  // };
+  return res.send(data);
 });

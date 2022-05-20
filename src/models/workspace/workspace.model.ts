@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 
 interface PermType {
   user: Schema.Types.ObjectId;
@@ -9,10 +9,11 @@ export interface WorkspaceInput {
   name: string;
   description: string;
   address: string;
-  membership: {
+  membership?: {
     amount: number;
     currenct: string;
   };
+  type: string;
   permission: PermType[];
   createdBy: Schema.Types.ObjectId;
   modifiedBy: Schema.Types.ObjectId;
@@ -41,6 +42,11 @@ const workSpaceSchema = new Schema<WorkspaceDocument>(
     },
     address: {
       type: String,
+    },
+    type: {
+      type: String,
+      enum: ['public', 'invite_only', 'approval_based'],
+      required: true,
     },
     status: {
       type: String,

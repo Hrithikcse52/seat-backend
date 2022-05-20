@@ -32,3 +32,17 @@ export async function getAllWorkspace(filter: FilterQuery<WorkspaceDocument>) {
     return null;
   }
 }
+
+export async function getWorkspace(filter: FilterQuery<WorkspaceDocument>) {
+  try {
+    const data = await workSpaceModel
+      .findOne(filter)
+      .populate({ path: 'permission.user', select: 'name email' })
+      .lean()
+      .exec();
+    return data;
+  } catch (err) {
+    console.log(err, 'fetch each');
+    return null;
+  }
+}

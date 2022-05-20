@@ -11,8 +11,7 @@ export interface UserInput {
 }
 
 export interface UserDocument extends UserInput, Document {
-  // email: { id: string; verified: boolean };
-  // phone: { number: number; vefified: boolean };
+  workspaces: Array<Schema.Types.ObjectId>;
   status: string;
   tokenVersion: number;
   role: string;
@@ -49,6 +48,12 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    workspaces: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'workspaces',
+      },
+    ],
     status: {
       type: String,
       enum: [
