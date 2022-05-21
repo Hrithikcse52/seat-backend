@@ -3,16 +3,16 @@ import 'dotenv/config';
 import { connect } from 'mongoose';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import { MONGO_URI, FRONT_END_URL, PORT } from './config';
-import { router as userController } from './controllers/users/user.controller';
-import { router as workSpaceController } from './controllers/workspace/workspace.controller';
+import { MONGO_URI, FRONT_END_URL, PORT, NODE_ENV } from './config';
+import { router as userRoute } from './controllers/users/user.route';
+import { router as workSpaceRoute } from './controllers/workspace/workspace.route';
 // import { FRONT_END_URL, MONGO_URI, PORT } from './config';
 
 const app: Application = express();
 (async () => {
   try {
     await connect(MONGO_URI!);
-    console.log('DB Connected!');
+    console.log('DB Connected! ', NODE_ENV);
   } catch (error) {
     console.log('Error connecting DB', error);
   }
@@ -22,9 +22,9 @@ app.use(cors({ credentials: true, origin: FRONT_END_URL }));
 app.use(express.json());
 app.use(cookieParser());
 
-// controllers
-app.use('/user', userController);
-app.use('/workspace', workSpaceController);
+// Routes
+app.use('/user', userRoute);
+app.use('/workspace', workSpaceRoute);
 
 app.get('/', (req, res) => {
   res.send({ message: 'server is up and running' });
