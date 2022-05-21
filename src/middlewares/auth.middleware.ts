@@ -9,13 +9,12 @@ export async function isAuth(req: ReqMod, res: Response, next: NextFunction) {
   const cookie = req.cookies;
   console.log('cookiews', cookie);
   const { access, refresh } = cookie;
-  console.log('access', access);
   if (!access && refresh) {
-    console.log('refresh the tokens');
+    // Refresh the tokens
     return res.status(403).send({ user: null });
   }
   if (!(access && refresh)) {
-    console.log('dont refresh the tokens');
+    // Dont refresh the tokens
     return res.status(401).send({ message: 'do login' });
   }
   try {

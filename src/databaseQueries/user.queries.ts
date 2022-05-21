@@ -38,6 +38,19 @@ export function getUser(filter: FilterQuery<UserDocument>, options = {}) {
   });
 }
 
+export async function addWorkspaceUser(id: string, workspace: string) {
+  try {
+    const updUser = await userModel
+      .findByIdAndUpdate(id, { $push: { workspaces: workspace } })
+      .exec();
+
+    return { code: 200, data: updUser };
+  } catch (err) {
+    console.log('errro  on p=joinin workspace');
+    return { code: 500, data: null, message: 'Upadte user Went wrong' };
+  }
+}
+
 export function incTokenVersion(_id: { _id: string }) {
   return new Promise<UserQueries>((resolve, reject) => {
     userModel.findByIdAndUpdate(

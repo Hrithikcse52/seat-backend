@@ -1,5 +1,5 @@
 import { Response, Router } from 'express';
-import mongoose from 'mongoose';
+import mongoose, { ObjectId } from 'mongoose';
 import {
   createWorkSpace,
   getAllWorkspace,
@@ -8,6 +8,7 @@ import {
 import { isAuth } from '../../middlewares/auth.middleware';
 import { ReqMod } from '../../types/util.types';
 import { WorkspaceInput } from '../../models/workspace/workspace.model';
+import { addWorkspaceUser } from '../../databaseQueries/user.queries';
 
 export const router = Router();
 
@@ -92,4 +93,46 @@ router.get('/:id', isAuth, async (req: ReqMod, res: Response) => {
   //   type: data.type,
   // };
   return res.send(data);
+});
+
+router.post('/join', isAuth, async (req: ReqMod, res: Response) => {
+  try {
+    const { workspace, role = 'user' }: { workspace: string; role?: string } =
+      req.body;
+    const { user } = req;
+    if (!user) {
+      return res.status(401).send({ message: 'Do Login to join a space' });
+    }
+    if (
+      user.workspaces &&
+      user.workspaces.find((space) => space.toString() === workspace)
+    ) {
+      console.log('already a memner');
+      return res.status(409).send({ message: 'already a memeber' });
+    }
+    const workspaceDetails = await getWorkspace({ _id: workspace });
+    // check for user is already a admin or manager for that workspace
+    if (!workspaceDetails) {
+      return res.status(500).send({ message: 'no workspace found' });
+    }
+    if (workspaceDetails.permission.find((usr) => usr.user === user._id)) {
+      return res.status(200).send({ message: 'already a management member' });
+    }
+
+    if (role === 'user') {
+      const { code, data, ...restData } = await addWorkspaceUser(
+        user._id,
+        workspace
+      );
+      if (code !== 200) {
+        return res.status(code).send({ message: restData.message });
+      }
+      return res.send({ message: 'workspace/ space Added' });
+    }
+    return res.status(500).send({ message: 'on maintenance' });
+
+    // validate user of already joinned!!
+  } catch (err) {
+    return res.status(401).send({ message: 'Something Went Wrong' });
+  }
 });

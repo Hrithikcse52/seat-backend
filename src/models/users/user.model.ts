@@ -11,7 +11,7 @@ export interface UserInput {
 }
 
 export interface UserDocument extends UserInput, Document {
-  workspaces: Array<Schema.Types.ObjectId>;
+  workspaces: Array<string>;
   status: string;
   tokenVersion: number;
   role: string;
