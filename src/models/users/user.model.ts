@@ -6,19 +6,19 @@ export interface UserInput {
     firstName: string;
     lastName: string;
   };
-  phone: {
-    number: number;
-    verified?: boolean;
-  };
-
+  phone: string;
   password: string;
 }
 
 export interface UserDocument extends UserInput, Document {
+  workspaces: Array<string>;
+  status: string;
   tokenVersion: number;
+  role: string;
   createdAt: Date;
   updatedAt: Date;
 }
+// status :{ phone :false,email:false}
 
 const userSchema = new Schema(
   {
@@ -36,14 +36,9 @@ const userSchema = new Schema(
       required: true,
     },
     phone: {
-      number: {
-        type: Number,
-        unique: true,
-      },
-      verified: {
-        type: Boolean,
-        default: false,
-      },
+      type: String,
+      unique: true,
+      required: true,
     },
     tokenVersion: {
       type: Number,
@@ -53,9 +48,30 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    workspaces: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'workspaces',
+      },
+    ],
+    status: {
+      type: String,
+      enum: [
+        'active',
+        'email_not_verified',
+        'phone_not_verified',
+        'not_verified',
+      ],
+      default: 'not_verified',
+    },
+    role: {
+      type: String,
+      enum: ['user', 'manager', 'admin', 'super_admin'],
+      default: 'user',
+    },
   },
   { timestamps: true }
 );
 
-const userModel = model<UserDocument>('user', userSchema);
+const userModel = model<UserDocument>('users', userSchema);
 export default userModel;

@@ -1,15 +1,23 @@
-import { Router } from 'express';
+import { Response, Router } from 'express';
 import { hash, compare } from 'bcrypt';
-import { FRONT_END_URL } from '../../config';
-import { createUser, getUser } from '../../databaseQueries/user.queries';
+import { verify } from 'jsonwebtoken';
+import { FRONT_END_URL, REFRESH_TOKEN_SECRET } from '../../config';
+import {
+  createUser,
+  getUser,
+  incTokenVersion,
+} from '../../databaseQueries/user.queries';
 import { clearTokens, buildTokens, setTokens } from '../../utils/token.utils';
+import { RefreshTokenPayload } from '../../types/token.types';
+import { isAuth } from '../../middlewares/auth.middleware';
+import { ReqMod } from '../../types/util.types';
 
 export const router = Router();
 
 router.post('/register', async (req, res) => {
   try {
-    const { firstName, lastName, email, password, phoneNumber } = req.body;
-    if (!(firstName && lastName && email && password && phoneNumber)) {
+    const { firstName, lastName, email, password, phone } = req.body;
+    if (!(firstName && lastName && email && password && phone)) {
       return res.status(400).send({ message: 'improper query', data: null });
     }
     const encryptPass = await hash(password, 10);
@@ -23,15 +31,13 @@ router.post('/register', async (req, res) => {
         firstName,
         lastName,
       },
-      phone: {
-        number: phoneNumber,
-      },
+      phone,
       password: encryptPass,
     });
+    console.log(code, user, message, 'user 35');
     if (code !== 200) {
       return res.status(code).send({ message, data: user });
     }
-    console.log(code, user, message, 'user 35');
     return res.send(user);
   } catch (error) {
     console.log('error while creating user, user controller line 35', error);
@@ -69,6 +75,7 @@ router.post('/login', async (req, res) => {
         email: user.email,
         name: user.name,
         phone: user.phone,
+        role: user.role,
         // accessToken,
         // refreshToken,
       });
@@ -85,23 +92,65 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// router.get('/check', async (req, res) => {
-//   const refresh = req.cookies;
-//   console.log('refresh', refresh);
-//   if (!refresh) {
-//     return res.status(403).send({ user: null });
-//   }
-//   console.log('cookie', refresh);
-//   const user = verify(
-//     refresh,
-//     REFRESH_TOKEN_SECRET as string
-//   ) as RefreshTokenPayload;
-//   console.log(user);
-//   const { data: userData } = await getUser({ _id: user.userId });
-//   console.log(userData);
-//   return res.send({
-//     name: userData?.name,
-//     email: userData?.email,
-//     id: userData?._id,
-//   });
-// });
+function handleRefreshError(res: Response, status: number, message: string) {
+  clearTokens(res);
+  return res.status(status).send({ message });
+}
+
+router.get('/refresh', async (req, res) => {
+  try {
+    const { refresh } = req.cookies;
+    // if (!refresh) return res.status(401).send({ message: 'unauthorized' });
+    if (!refresh) return handleRefreshError(res, 401, 'unauthoized');
+    const user = verify(
+      refresh,
+      REFRESH_TOKEN_SECRET as string
+    ) as RefreshTokenPayload;
+    console.log('refresh', user);
+    // desearelize the token
+    const { data: userData } = await getUser({ _id: user.userId });
+    console.log('user data', userData);
+    // if (!userData) return res.status(404).send({ message: 'user not found' });
+    if (!userData) return handleRefreshError(res, 404, 'user not found');
+    // check if the version of token matches the prev refresh token
+
+    if (user.version !== userData?.tokenVersion) {
+      // return res.status(401).send({ message: 'token is expired relogin' });
+      return handleRefreshError(res, 401, 'expired relogin');
+    }
+    console.log(
+      "token's version is same inctoken version and create new token"
+    );
+
+    const { data: newUser } = await incTokenVersion({ _id: user.userId });
+    console.log('new user version update', newUser);
+    if (!newUser)
+      // return res.status(500).send({ message: 'token update failed' });
+      return handleRefreshError(res, 500, 'token update failed');
+
+    const { accessToken, refreshToken } = buildTokens(newUser);
+    console.log('called token creattion', accessToken, refreshToken);
+    setTokens(res, accessToken, refreshToken);
+    return res.send({ message: 'done' });
+  } catch (error) {
+    console.log('error on refresh token', error);
+    // return res.status(500).send({ message: 'user error' });
+    return handleRefreshError(res, 500, 'user error');
+  }
+});
+
+router.get('/check', isAuth, async (req: ReqMod, res) => {
+  const { user } = req;
+  if (!user) {
+    console.log('no user in check');
+    return res.status(401).send({ message: 'do login' });
+  }
+  return res.send({
+    name: user.name,
+    email: user.email,
+    id: user._id,
+    role: user.role,
+    phone: user.phone,
+    status: user.status,
+  });
+});

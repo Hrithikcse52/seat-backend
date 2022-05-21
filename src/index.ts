@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { MONGO_URI, FRONT_END_URL, PORT } from './config';
 import { router as userController } from './controllers/users/user.controller';
+import { router as workSpaceController } from './controllers/workspace/workspace.controller';
 // import { FRONT_END_URL, MONGO_URI, PORT } from './config';
 
 const app: Application = express();
@@ -23,6 +24,7 @@ app.use(cookieParser());
 
 // controllers
 app.use('/user', userController);
+app.use('/workspace', workSpaceController);
 
 app.get('/', (req, res) => {
   res.send({ message: 'server is up and running' });

@@ -9,6 +9,7 @@ export interface UserQueries {
 
 export function createUser(doc: UserInput) {
   return new Promise<UserQueries>((resolve, reject) => {
+    console.log('doc ', doc);
     userModel.create(doc, (err, item) => {
       if (err || !item) {
         return reject({
@@ -37,11 +38,25 @@ export function getUser(filter: FilterQuery<UserDocument>, options = {}) {
   });
 }
 
-export function incTokenVersion(id: { id: string }) {
+export async function addWorkspaceUser(id: string, workspace: string) {
+  try {
+    const updUser = await userModel
+      .findByIdAndUpdate(id, { $push: { workspaces: workspace } })
+      .exec();
+
+    return { code: 200, data: updUser };
+  } catch (err) {
+    console.log('errro  on p=joinin workspace');
+    return { code: 500, data: null, message: 'Upadte user Went wrong' };
+  }
+}
+
+export function incTokenVersion(_id: { _id: string }) {
   return new Promise<UserQueries>((resolve, reject) => {
     userModel.findByIdAndUpdate(
-      id,
+      _id,
       { $inc: { tokenVersion: 1 } },
+      { new: true },
       (err, item) => {
         if (err || !item) {
           return reject({
