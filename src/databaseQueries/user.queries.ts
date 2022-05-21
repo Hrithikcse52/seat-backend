@@ -1,5 +1,6 @@
-import { FilterQuery } from 'mongoose';
+import { FilterQuery, PopulateOptions } from 'mongoose';
 import userModel, { UserDocument, UserInput } from '../models/users/user.model';
+import { WorkspaceDocument } from '../models/workspace/workspace.model';
 
 export interface UserQueries {
   code: number;
@@ -23,19 +24,35 @@ export function createUser(doc: UserInput) {
   });
 }
 
-export function getUser(filter: FilterQuery<UserDocument>, options = {}) {
-  return new Promise<UserQueries>((resolve, reject) => {
-    userModel.findOne(filter, '', options, (err, item) => {
-      if (err || !item) {
-        return reject({
-          code: 500,
-          message: 'error while fetching user',
-          data: err,
-        });
-      }
-      return resolve({ code: 200, message: '', data: item });
-    });
-  });
+// export function getUser(filter: FilterQuery<UserDocument>, options = {}) {
+//   return new Promise<UserQueries>((resolve, reject) => {
+//     userModel.findOne(filter, '', options, (err, item) => {
+//       if (err || !item) {
+//         return reject({
+//           code: 500,
+//           message: 'error while fetching user',
+//           data: err,
+//         });
+//       }
+//       return resolve({ code: 200, message: '', data: item });
+//     });
+//   });
+// }
+
+export async function getUser(
+  filter: FilterQuery<UserDocument>,
+  populate: PopulateOptions | null
+) {
+  try {
+    const query = userModel.findOne(filter);
+    if (populate) {
+      query.populate(populate);
+    }
+    const data = await query.exec();
+    return { code: 200, data };
+  } catch (err) {
+    return { code: 500, data: null, err, message: 'Something went wrong' };
+  }
 }
 
 export async function addWorkspaceUser(id: string, workspace: string) {

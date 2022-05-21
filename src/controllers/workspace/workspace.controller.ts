@@ -1,5 +1,5 @@
 import { Response, Router } from 'express';
-import mongoose, { ObjectId } from 'mongoose';
+import { ObjectId } from 'mongoose';
 import {
   createWorkSpace,
   getAllWorkspace,
@@ -46,9 +46,7 @@ router.post('/', isAuth, async (req: ReqMod, res) => {
       return res.status(401).send({ user: null, message: 'login' });
     }
     // TODO: Name should be unique do not run mongodb validation run self validation.
-    const permission = [
-      { user: user._id as mongoose.Schema.Types.ObjectId, role: 'admin' },
-    ];
+    const permission = [{ user: user._id as ObjectId, role: 'admin' }];
     const payload: WorkspaceInput = {
       name,
       description,
@@ -80,7 +78,10 @@ router.post('/', isAuth, async (req: ReqMod, res) => {
 router.get('/:id', isAuth, async (req: ReqMod, res: Response) => {
   const { id } = req.params;
   console.log('id', id);
-  const data = await getWorkspace({ _id: id });
+  const data = await getWorkspace(
+    { _id: id },
+    { path: 'permission.user', select: 'name email' }
+  );
 
   if (!data) {
     return res.status(500).send({ message: 'Something Went Wrong' });
@@ -110,13 +111,19 @@ router.post('/join', isAuth, async (req: ReqMod, res: Response) => {
       console.log('already a memner');
       return res.status(409).send({ message: 'already a memeber' });
     }
-    const workspaceDetails = await getWorkspace({ _id: workspace });
+    const workspaceDetails = await getWorkspace({ _id: workspace }, null);
     // check for user is already a admin or manager for that workspace
     if (!workspaceDetails) {
       return res.status(500).send({ message: 'no workspace found' });
     }
-    if (workspaceDetails.permission.find((usr) => usr.user === user._id)) {
-      return res.status(200).send({ message: 'already a management member' });
+    console.log('workspace deata', workspaceDetails.permission, workspace);
+
+    if (
+      workspaceDetails.permission.find(
+        (usr) => usr.user.toString() === user._id.toString()
+      )
+    ) {
+      return res.status(409).send({ message: 'already a management member' });
     }
 
     if (role === 'user') {

@@ -59,7 +59,7 @@ router.post('/login', async (req, res) => {
     if (!(email && password)) {
       return res.status(400).send({ message: 'improper query', data: null });
     }
-    const { code, data: user, message } = await getUser({ email });
+    const { code, data: user, message } = await getUser({ email }, null);
     if (code !== 200 || !user) {
       return res.status(code).send({ message, data: user });
     }
@@ -108,7 +108,7 @@ router.get('/refresh', async (req, res) => {
     ) as RefreshTokenPayload;
     console.log('refresh', user);
     // desearelize the token
-    const { data: userData } = await getUser({ _id: user.userId });
+    const { data: userData } = await getUser({ _id: user.userId }, null);
     console.log('user data', userData);
     // if (!userData) return res.status(404).send({ message: 'user not found' });
     if (!userData) return handleRefreshError(res, 404, 'user not found');
@@ -152,5 +152,6 @@ router.get('/check', isAuth, async (req: ReqMod, res) => {
     role: user.role,
     phone: user.phone,
     status: user.status,
+    workspaces: user.workspaces,
   });
 });

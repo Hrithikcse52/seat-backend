@@ -1,4 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
+import { WorkspaceDocument } from '../workspace/workspace.model';
 
 export interface UserInput {
   email: string;
@@ -11,7 +12,7 @@ export interface UserInput {
 }
 
 export interface UserDocument extends UserInput, Document {
-  workspaces: Array<string>;
+  workspaces: Array<WorkspaceDocument | WorkspaceDocument['_id']>;
   status: string;
   tokenVersion: number;
   role: string;

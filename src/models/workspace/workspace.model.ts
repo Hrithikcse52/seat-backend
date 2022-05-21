@@ -1,7 +1,16 @@
 import { Schema, model, Document } from 'mongoose';
 
 interface PermType {
-  user: Schema.Types.ObjectId;
+  user:
+    | {
+        name: {
+          firstName: string;
+          lastName: string;
+        };
+        email: string;
+        id: string;
+      }
+    | Schema.Types.ObjectId;
   role: string;
 }
 
