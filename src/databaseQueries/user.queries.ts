@@ -1,6 +1,5 @@
 import { FilterQuery, PopulateOptions } from 'mongoose';
 import userModel, { UserDocument, UserInput } from '../models/users/user.model';
-import { WorkspaceDocument } from '../models/workspace/workspace.model';
 
 export interface UserQueries {
   code: number;
