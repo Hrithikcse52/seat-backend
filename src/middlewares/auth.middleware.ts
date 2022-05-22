@@ -8,7 +8,7 @@ import { ReqMod } from '../types/util.types';
 export async function isAuth(req: ReqMod, res: Response, next: NextFunction) {
   const cookie = req.cookies;
 
-  console.log('cookiews', cookie);
+  console.log('cookiews req.cookies', req.cookies, req.headers);
   // const { access, refresh } = cookie;
   const access = req.cookies.access || req.headers['x-access-token'];
   const refresh = req.cookies.refresh || req.headers['x-refresh-token'];
@@ -25,7 +25,6 @@ export async function isAuth(req: ReqMod, res: Response, next: NextFunction) {
       access,
       ACCESS_TOKEN_SECRET as string
     ) as AccessTokenPayload;
-    console.log(user);
     if (!user) {
       return res.status(401).send({ user: null, message: 'invalid token' });
     }
@@ -40,7 +39,6 @@ export async function isAuth(req: ReqMod, res: Response, next: NextFunction) {
     if (code !== 200 || !userData) {
       return res.status(code).send({ user: null, message });
     }
-    console.log('user', userData.workspaces);
     req.user = userData;
     return next();
   } catch (error) {
