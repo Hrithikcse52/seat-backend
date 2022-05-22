@@ -15,12 +15,12 @@ enum TokenExpiration {
 }
 
 const defaultCookieOptions: CookieOptions = {
-  httpOnly: false,
-  // sameSite: 'lax',
-  secure: isProd,
-  sameSite: isProd ? 'strict' : 'lax',
-  // domain: FRONT_END_URL,
-  path: '/',
+  // httpOnly: false,
+  // // sameSite: 'lax',
+  // secure: isProd,
+  // sameSite: isProd ? 'strict' : 'lax',
+  // // domain: FRONT_END_URL,
+  // path: '/',
 };
 
 const refreshTokenCookieOptions: CookieOptions = {
