@@ -16,8 +16,10 @@ enum TokenExpiration {
 
 const defaultCookieOptions: CookieOptions = {
   httpOnly: true,
-  secure: isProd,
-  sameSite: isProd ? 'strict' : 'lax',
+  sameSite: 'lax',
+  secure: false,
+  // secure: isProd,
+  // sameSite: isProd ? 'strict' : 'lax',
   // domain: FRONT_END_URL,
   path: '/',
 };
