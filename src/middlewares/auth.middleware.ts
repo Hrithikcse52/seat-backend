@@ -7,8 +7,11 @@ import { ReqMod } from '../types/util.types';
 
 export async function isAuth(req: ReqMod, res: Response, next: NextFunction) {
   const cookie = req.cookies;
+
   console.log('cookiews', cookie);
-  const { access, refresh } = cookie;
+  // const { access, refresh } = cookie;
+  const access = req.cookies.access || req.headers['x-access-token'];
+  const refresh = req.cookies.refresh || req.headers['x-refresh-token'];
   if (!access && refresh) {
     // Refresh the tokens
     return res.status(403).send({ user: null });

@@ -96,7 +96,7 @@ function handleRefreshError(res: Response, status: number, message: string) {
 
 export async function refreshController(req: Request, res: Response) {
   try {
-    const { refresh } = req.cookies;
+    const { refresh } = req.cookies || req.headers['x-refresh-token'];
     // if (!refresh) return res.status(401).send({ message: 'unauthorized' });
     if (!refresh) return handleRefreshError(res, 401, 'unauthoized');
     const user = verify(
