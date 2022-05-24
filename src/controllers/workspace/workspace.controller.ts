@@ -63,7 +63,7 @@ export async function createController(req: ReqMod, res: Response) {
 
     return res.send({ message: 'received' });
   } catch (error) {
-    console.log(
+    console.error(
       '🚀 ~ file: workspace.controller.ts ~ line 22 ~ router.post ~ error',
       error
     );
@@ -73,11 +73,15 @@ export async function createController(req: ReqMod, res: Response) {
 
 export async function getWorkspaceController(req: ReqMod, res: Response) {
   const { id } = req.params;
-  console.log('id', id);
   const data = await getWorkspace(
     { _id: id },
     { path: 'permission.user', select: 'name email' }
   );
+  console.log(
+    '🚀 ~ file: workspace.controller.ts ~ line 81 ~ getWorkspaceController ~ data',
+    data
+  );
+
   // TODO://Filter data to be sent
   if (!data) {
     return res.status(500).send({ message: 'Something Went Wrong' });
