@@ -3,11 +3,14 @@ import 'dotenv/config';
 import { connect } from 'mongoose';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import morgan from 'morgan';
+
 import { MONGO_URI, FRONT_END_URL, PORT, NODE_ENV } from './config';
+
 import { router as userRoute } from './controllers/users/user.route';
 import { router as workSpaceRoute } from './controllers/workspace/workspace.route';
 import { router as metaRoute } from './controllers/meta/meta.route';
-// import { FRONT_END_URL, MONGO_URI, PORT } from './config';
+import { router as blogRoute } from './controllers/blog/blog.route';
 
 const app: Application = express();
 (async () => {
@@ -22,11 +25,13 @@ const app: Application = express();
 app.use(cors({ credentials: true, origin: FRONT_END_URL }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(morgan('tiny'));
 
 // Routes
 app.use('/user', userRoute);
 app.use('/workspace', workSpaceRoute);
 app.use('/meta', metaRoute);
+app.use('/blog', blogRoute);
 
 app.get('/', (req, res) => {
   res.send({ message: 'server is up and running' });
