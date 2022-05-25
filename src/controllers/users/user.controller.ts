@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import { hash, compare } from 'bcrypt';
+import fs from 'fs';
 import { verify } from 'jsonwebtoken';
-import { FRONT_END_URL, REFRESH_TOKEN_SECRET } from '../../config';
+import { FRONT_END_URL, REFRESH_TOKEN_SECRET, ROOT } from '../../config';
 import {
   createUser,
   getUser,
@@ -10,6 +11,7 @@ import {
 import { clearTokens, buildTokens, setTokens } from '../../utils/token.utils';
 import { RefreshTokenPayload } from '../../types/token.types';
 import { ReqMod } from '../../types/util.types';
+import { supabase, uploadImage } from '../../lib/supabase.lib';
 
 export async function registerHandler(req: Request, res: Response) {
   try {
@@ -41,6 +43,32 @@ export async function registerHandler(req: Request, res: Response) {
     return res
       .status(500)
       .send({ message: 'something went wrong', data: error });
+  }
+}
+
+export async function editUserController(req: ReqMod, res: Response) {
+  try {
+    console.log('req', req.body, req.headers, req.files, req.file);
+    const { user, file } = req;
+    if (file) {
+      const newFile = fs.readFileSync(file.path);
+      console.log('file', newFile);
+      const { data, error } = await uploadImage(
+        'seat',
+        `user/${file.filename}`,
+        newFile
+      );
+      console.log(
+        '🚀 ~ file: user.controller.ts ~ line 52 ~ editUserController ~ data, error ',
+        data,
+        error
+      );
+    }
+    res.send({ message: 'Rec' });
+  } catch (error) {
+    res.send({ message: 'Ressc' });
+  } finally {
+    if (req.file) fs.unlinkSync(req.file.path);
   }
 }
 
