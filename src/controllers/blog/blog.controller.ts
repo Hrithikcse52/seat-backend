@@ -14,40 +14,26 @@ async function create(req: ReqMod, res: Response) {
       createdBy: user._id,
     });
     if (code !== 200) {
-      return res
-        .status(code)
-        .send({ message: restData.message || 'something went wrong' });
+      return res.status(code).send({ message: restData.message || 'something went wrong' });
     }
     return res.send(data);
   } catch (error) {
-    return res
-      .status(500)
-      .send({ message: 'something went wrong', error: JSON.stringify(error) });
+    return res.status(500).send({ message: 'something went wrong', error: JSON.stringify(error) });
   }
 }
 
 async function index(req: ReqMod, res: Response) {
   try {
     const { workspace } = req.body;
-    const { code, data, ...rest } = await getBlog(
-      { workspace },
-      { path: 'createdBy', select: 'name email' }
-    );
+    const { code, data, ...rest } = await getBlog({ workspace }, { path: 'createdBy', select: 'name email' });
     if (code !== 200 || !data) {
-      return res
-        .status(code)
-        .send({ message: rest.message || 'something went wring' });
+      return res.status(code).send({ message: rest.message || 'something went wring' });
     }
     return res.send(data);
   } catch (error) {
-    console.log(
-      '🚀 ~ file: blog.controller.ts ~ line 40 ~ index ~ error',
-      error
-    );
+    console.log('🚀 ~ file: blog.controller.ts ~ line 40 ~ index ~ error', error);
 
-    return res
-      .status(500)
-      .send({ message: 'something went wring', error: JSON.stringify(error) });
+    return res.status(500).send({ message: 'something went wring', error: JSON.stringify(error) });
   }
 }
 

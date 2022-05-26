@@ -59,12 +59,7 @@ const workSpaceSchema = new Schema<WorkspaceDocument>(
     },
     status: {
       type: String,
-      enum: [
-        'active',
-        'email_not_verified',
-        'phone_not_verified',
-        'not_verified',
-      ],
+      enum: ['active', 'email_not_verified', 'phone_not_verified', 'not_verified'],
       default: 'not_verified',
     },
     membership: {

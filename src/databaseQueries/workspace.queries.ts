@@ -1,8 +1,5 @@
 import { FilterQuery, PopulateOptions } from 'mongoose';
-import workSpaceModel, {
-  WorkspaceDocument,
-  WorkspaceInput,
-} from '../models/workspace/workspace.model';
+import workSpaceModel, { WorkspaceDocument, WorkspaceInput } from '../models/workspace/workspace.model';
 import { DBQueries } from '../types/util.types';
 
 export function createWorkSpace(doc: WorkspaceInput) {
@@ -33,10 +30,7 @@ export async function getAllWorkspace(filter: FilterQuery<WorkspaceDocument>) {
   }
 }
 
-export async function getWorkspace(
-  filter: FilterQuery<WorkspaceDocument>,
-  populate: PopulateOptions | null
-) {
+export async function getWorkspace(filter: FilterQuery<WorkspaceDocument>, populate: PopulateOptions | null) {
   try {
     const query = workSpaceModel.findOne(filter);
     if (populate) {

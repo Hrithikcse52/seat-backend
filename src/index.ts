@@ -24,7 +24,6 @@ const app: Application = express();
 
 app.use(cors({ credentials: true, origin: FRONT_END_URL }));
 app.use(express.json());
-app.use(express.urlencoded({}));
 app.use(cookieParser());
 app.use(morgan('tiny'));
 

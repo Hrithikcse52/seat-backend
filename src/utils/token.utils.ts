@@ -2,11 +2,7 @@ import { CookieOptions, Response } from 'express';
 import { sign } from 'jsonwebtoken';
 import { isProd, ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from '../config';
 import { UserDocument } from '../models/users/user.model';
-import {
-  AccessTokenPayload,
-  RefreshTokenPayload,
-  Cookies,
-} from '../types/token.types';
+import { AccessTokenPayload, RefreshTokenPayload, Cookies } from '../types/token.types';
 
 enum TokenExpiration {
   Access = 60 * 60 * 6,
@@ -47,8 +43,7 @@ function signRefreshToken(payload: RefreshTokenPayload) {
 
 export function setTokens(res: Response, access: string, refresh?: string) {
   res.cookie(Cookies.AccessToken, access, accessTokenCookieOptions);
-  if (refresh)
-    res.cookie(Cookies.RefreshToken, refresh, refreshTokenCookieOptions);
+  if (refresh) res.cookie(Cookies.RefreshToken, refresh, refreshTokenCookieOptions);
 }
 
 export function buildTokens(user: UserDocument) {

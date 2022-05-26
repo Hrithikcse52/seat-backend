@@ -11,7 +11,7 @@ export const storage = multer.diskStorage({
     const { user } = req;
     console.log('file uploading----', file);
     if (user) {
-      let name = `${user._id}`;
+      let name = `${Date.now()}_${user._id}`;
       if (file.mimetype === 'image/jpeg') name += '.jpeg';
       else if (file.mimetype === 'image/png') name += '.png';
       else cb(new Error('file Format check'), '');

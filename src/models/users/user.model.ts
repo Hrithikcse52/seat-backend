@@ -9,6 +9,7 @@ export interface UserInput {
   };
   phone: string;
   password: string;
+  profileImg: string;
 }
 
 export interface UserDocument extends UserInput, Document {
@@ -49,6 +50,7 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    profileImg: String,
     workspaces: [
       {
         type: Schema.Types.ObjectId,
@@ -57,12 +59,7 @@ const userSchema = new Schema(
     ],
     status: {
       type: String,
-      enum: [
-        'active',
-        'email_not_verified',
-        'phone_not_verified',
-        'not_verified',
-      ],
+      enum: ['active', 'email_not_verified', 'phone_not_verified', 'not_verified'],
       default: 'not_verified',
     },
     role: {

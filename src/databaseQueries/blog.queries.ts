@@ -14,20 +14,14 @@ export async function createBlog(doc: BlogInput) {
   }
 }
 
-export async function getBlog(
-  filter: FilterQuery<BlogDocument>,
-  populate: PopulateOptions | null
-) {
+export async function getBlog(filter: FilterQuery<BlogDocument>, populate: PopulateOptions | null) {
   try {
     const query = blogModel.find(filter).sort({ createdAt: -1 });
     if (populate) query.populate(populate);
     const blogs = await query.exec();
     return { code: 200, data: blogs };
   } catch (error) {
-    console.log(
-      '🚀 ~ file: blog.queries.ts ~ line 22 ~ getBlog ~ error',
-      error
-    );
+    console.log('🚀 ~ file: blog.queries.ts ~ line 22 ~ getBlog ~ error', error);
     return { code: 500, message: 'Something went Wrong', data: null };
   }
 }
