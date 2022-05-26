@@ -1,7 +1,7 @@
-name: Develop
+name: Deploy Production
 on:
   push:
-    branches: [develop]
+    branches: [main]
   workflow_dispatch:
 env:
   DEMO_SSH_KEY: ${{ secrets.DEMO_SSH_KEY }}
