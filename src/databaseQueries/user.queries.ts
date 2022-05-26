@@ -1,4 +1,4 @@
-import { FilterQuery, PopulateOptions } from 'mongoose';
+import { FilterQuery, PopulateOptions, UpdateQuery } from 'mongoose';
 import userModel, { UserDocument, UserInput } from '../models/users/user.model';
 
 export interface UserQueries {
@@ -38,10 +38,23 @@ export function createUser(doc: UserInput) {
 //   });
 // }
 
-export async function getUser(
-  filter: FilterQuery<UserDocument>,
-  populate: PopulateOptions | null
-) {
+export async function updateUser(id: string, update: UpdateQuery<UserDocument>) {
+  try {
+    const user = await userModel.findByIdAndUpdate(id, update, { new: true }).exec();
+    if (!user) {
+      return { code: 501, message: 'update error db' };
+    }
+    return { code: 200, data: user };
+  } catch (err) {
+    return {
+      code: 501,
+      message: 'update error db',
+      error: JSON.stringify(err),
+    };
+  }
+}
+
+export async function getUser(filter: FilterQuery<UserDocument>, populate: PopulateOptions | null) {
   try {
     const query = userModel.findOne(filter);
     if (populate) {
@@ -56,9 +69,7 @@ export async function getUser(
 
 export async function addWorkspaceUser(id: string, workspace: string) {
   try {
-    const updUser = await userModel
-      .findByIdAndUpdate(id, { $push: { workspaces: workspace } })
-      .exec();
+    const updUser = await userModel.findByIdAndUpdate(id, { $push: { workspaces: workspace } }).exec();
 
     return { code: 200, data: updUser };
   } catch (err) {
@@ -69,20 +80,15 @@ export async function addWorkspaceUser(id: string, workspace: string) {
 
 export function incTokenVersion(_id: { _id: string }) {
   return new Promise<UserQueries>((resolve, reject) => {
-    userModel.findByIdAndUpdate(
-      _id,
-      { $inc: { tokenVersion: 1 } },
-      { new: true },
-      (err, item) => {
-        if (err || !item) {
-          return reject({
-            code: 500,
-            message: 'error while updating user',
-            data: err,
-          });
-        }
-        return resolve({ code: 200, message: '', data: item });
+    userModel.findByIdAndUpdate(_id, { $inc: { tokenVersion: 1 } }, { new: true }, (err, item) => {
+      if (err || !item) {
+        return reject({
+          code: 500,
+          message: 'error while updating user',
+          data: err,
+        });
       }
-    );
+      return resolve({ code: 200, message: '', data: item });
+    });
   });
 }

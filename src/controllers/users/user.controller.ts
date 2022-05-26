@@ -2,20 +2,16 @@ import { Request, Response } from 'express';
 import { hash, compare } from 'bcrypt';
 import fs from 'fs';
 import { verify } from 'jsonwebtoken';
-import { FRONT_END_URL, REFRESH_TOKEN_SECRET, ROOT } from '../../config';
-import {
-  createUser,
-  getUser,
-  incTokenVersion,
-} from '../../databaseQueries/user.queries';
+import { FRONT_END_URL, REFRESH_TOKEN_SECRET } from '../../config';
+import { createUser, getUser, incTokenVersion, updateUser } from '../../databaseQueries/user.queries';
 import { clearTokens, buildTokens, setTokens } from '../../utils/token.utils';
 import { RefreshTokenPayload } from '../../types/token.types';
 import { ReqMod } from '../../types/util.types';
-import { supabase, uploadImage } from '../../lib/supabase.lib';
+import { uploadImage } from '../../lib/supabase.lib';
 
 export async function registerHandler(req: Request, res: Response) {
   try {
-    const { firstName, lastName, email, password, phone } = req.body;
+    const { firstName, lastName, email, password, phone, profileImg } = req.body;
     if (!(firstName && lastName && email && password && phone)) {
       return res.status(400).send({ message: 'improper query', data: null });
     }
@@ -30,7 +26,9 @@ export async function registerHandler(req: Request, res: Response) {
         firstName,
         lastName,
       },
+      profileImg,
       phone,
+
       password: encryptPass,
     });
     console.log(code, user, message, 'user 35');
@@ -40,9 +38,7 @@ export async function registerHandler(req: Request, res: Response) {
     return res.send(user);
   } catch (error) {
     console.log('error while creating user, user controller line 35', error);
-    return res
-      .status(500)
-      .send({ message: 'something went wrong', data: error });
+    return res.status(500).send({ message: 'something went wrong', data: error });
   }
 }
 
@@ -50,23 +46,50 @@ export async function editUserController(req: ReqMod, res: Response) {
   try {
     console.log('req', req.body, req.headers, req.files, req.file);
     const { user, file } = req;
-    if (file) {
+    if (!user) {
+      return res.status(500).send({ message: 'user Error' });
+    }
+    const { firstName, lastName, email } = req.body;
+    const updateDoc: {
+      name?: {
+        firstName?: string;
+        lastName?: string;
+      };
+      email?: string;
+      profileImg?: string;
+    } = {};
+    if (file && user) {
       const newFile = fs.readFileSync(file.path);
       console.log('file', newFile);
-      const { data, error } = await uploadImage(
-        'seat',
-        `user/${file.filename}`,
-        newFile
-      );
-      console.log(
-        '🚀 ~ file: user.controller.ts ~ line 52 ~ editUserController ~ data, error ',
-        data,
-        error
-      );
+      const { data, error } = await uploadImage('seat', `user/${user._id}/`, file.filename, file, newFile);
+      console.log('data', data, error);
+      if (!data || error) {
+        return res.status(500).send({ message: 'Something went Wring', error });
+      }
+      updateDoc.profileImg = data.publicURL;
     }
-    res.send({ message: 'Rec' });
+    if (firstName || lastName) {
+      updateDoc.name = {};
+      if (firstName) {
+        updateDoc.name.firstName = firstName;
+      }
+      if (lastName) {
+        updateDoc.name.lastName = lastName;
+      }
+    }
+    // TODO://Check for unique emails
+
+    if (email) {
+      updateDoc.email = email;
+    }
+    const { code: upCode, data: newUser, ...rest } = await updateUser(user._id, updateDoc);
+
+    if (upCode !== 200) return res.status(upCode).send({ message: rest.message || 'somethng went wring' });
+
+    return res.send(newUser);
   } catch (error) {
-    res.send({ message: 'Ressc' });
+    console.log('err86', error);
+    return res.status(501).send({ message: 'Ressc', error: JSON.stringify(error) });
   } finally {
     if (req.file) fs.unlinkSync(req.file.path);
   }
@@ -101,6 +124,7 @@ export async function loginController(req: Request, res: Response) {
         name: user.name,
         phone: user.phone,
         role: user.role,
+        profileImg: user.profileImg,
         // accessToken,
         // refreshToken,
       });
@@ -111,9 +135,7 @@ export async function loginController(req: Request, res: Response) {
     return res.redirect(`${FRONT_END_URL}`);
   } catch (error) {
     console.log('error while logging user, user controller line 49', error);
-    return res
-      .status(500)
-      .send({ message: 'something went wrong', data: error });
+    return res.status(500).send({ message: 'something went wrong', data: error });
   }
 }
 
@@ -127,10 +149,7 @@ export async function refreshController(req: Request, res: Response) {
     const { refresh } = req.cookies || req.headers['x-refresh-token'];
     // if (!refresh) return res.status(401).send({ message: 'unauthorized' });
     if (!refresh) return handleRefreshError(res, 401, 'unauthoized');
-    const user = verify(
-      refresh,
-      REFRESH_TOKEN_SECRET as string
-    ) as RefreshTokenPayload;
+    const user = verify(refresh, REFRESH_TOKEN_SECRET as string) as RefreshTokenPayload;
     console.log('refresh', user);
     // desearelize the token
     const { data: userData } = await getUser({ _id: user.userId }, null);
@@ -143,9 +162,7 @@ export async function refreshController(req: Request, res: Response) {
       // return res.status(401).send({ message: 'token is expired relogin' });
       return handleRefreshError(res, 401, 'expired relogin');
     }
-    console.log(
-      "token's version is same inctoken version and create new token"
-    );
+    console.log("token's version is same inctoken version and create new token");
 
     const { data: newUser } = await incTokenVersion({ _id: user.userId });
     console.log('new user version update', newUser);
@@ -177,6 +194,7 @@ export async function checkUserController(req: ReqMod, res: Response) {
     role: user.role,
     phone: user.phone,
     status: user.status,
+    profileImg: user.profileImg,
     workspaces: user.workspaces,
   });
 }

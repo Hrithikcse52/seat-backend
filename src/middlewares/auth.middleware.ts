@@ -17,10 +17,7 @@ export async function isAuth(req: ReqMod, res: Response, next: NextFunction) {
     return res.status(401).send({ message: 'do login' });
   }
   try {
-    const user = verify(
-      access,
-      ACCESS_TOKEN_SECRET as string
-    ) as AccessTokenPayload;
+    const user = verify(access, ACCESS_TOKEN_SECRET as string) as AccessTokenPayload;
     if (!user) {
       return res.status(401).send({ user: null, message: 'invalid token' });
     }
@@ -28,19 +25,14 @@ export async function isAuth(req: ReqMod, res: Response, next: NextFunction) {
       code,
       data: userData,
       message,
-    } = await getUser(
-      { _id: user.userId },
-      { path: 'workspaces', select: 'name' }
-    );
+    } = await getUser({ _id: user.userId }, { path: 'workspaces', select: 'name' });
     if (code !== 200 || !userData) {
       return res.status(code).send({ user: null, message });
     }
     req.user = userData;
     return next();
   } catch (error) {
-    return res
-      .status(500)
-      .send({ user: null, message: 'Something went wrong!' });
+    return res.status(500).send({ user: null, message: 'Something went wrong!' });
   }
 }
 
@@ -59,9 +51,7 @@ export async function isAdmin(req: ReqMod, res: Response, next: NextFunction) {
     return next();
   } catch (error) {
     console.log('error in isAdmin', error);
-    return res
-      .status(500)
-      .send({ user: null, message: 'Something went wrong!' });
+    return res.status(500).send({ user: null, message: 'Something went wrong!' });
   }
 }
 
@@ -72,11 +62,7 @@ export function handleUser(req: ReqMod, res: Response) {
   }
 }
 
-export async function isManager(
-  req: ReqMod,
-  res: Response,
-  next: NextFunction
-) {
+export async function isManager(req: ReqMod, res: Response, next: NextFunction) {
   const { user } = req;
   if (!user) {
     console.log('ismanager middle ware');
@@ -90,17 +76,11 @@ export async function isManager(
     return next();
   } catch (error) {
     console.log('error in isManager', error);
-    return res
-      .status(500)
-      .send({ user: null, message: 'Something went wrong!' });
+    return res.status(500).send({ user: null, message: 'Something went wrong!' });
   }
 }
 
-export async function isManagerOrAdmin(
-  req: ReqMod,
-  res: Response,
-  next: NextFunction
-) {
+export async function isManagerOrAdmin(req: ReqMod, res: Response, next: NextFunction) {
   const { user } = req;
   if (!user) {
     console.log('isManagerOradmin middle ware');
@@ -114,8 +94,6 @@ export async function isManagerOrAdmin(
     return next();
   } catch (error) {
     console.log('error in isManagerOradmin', error);
-    return res
-      .status(500)
-      .send({ user: null, message: 'Something went wrong!' });
+    return res.status(500).send({ user: null, message: 'Something went wrong!' });
   }
 }
