@@ -1,7 +1,8 @@
-import { Response, Router } from 'express';
+import { Request, Response } from 'express';
 import { hash, compare } from 'bcrypt';
+import fs from 'fs';
 import { verify } from 'jsonwebtoken';
-import { FRONT_END_URL, REFRESH_TOKEN_SECRET } from '../../config';
+import { FRONT_END_URL, REFRESH_TOKEN_SECRET, ROOT } from '../../config';
 import {
   createUser,
   getUser,
@@ -9,12 +10,10 @@ import {
 } from '../../databaseQueries/user.queries';
 import { clearTokens, buildTokens, setTokens } from '../../utils/token.utils';
 import { RefreshTokenPayload } from '../../types/token.types';
-import { isAuth } from '../../middlewares/auth.middleware';
 import { ReqMod } from '../../types/util.types';
+import { supabase, uploadImage } from '../../lib/supabase.lib';
 
-export const router = Router();
-
-router.post('/register', async (req, res) => {
+export async function registerHandler(req: Request, res: Response) {
   try {
     const { firstName, lastName, email, password, phone } = req.body;
     if (!(firstName && lastName && email && password && phone)) {
@@ -45,21 +44,47 @@ router.post('/register', async (req, res) => {
       .status(500)
       .send({ message: 'something went wrong', data: error });
   }
-});
+}
 
-router.get('/logout', async (req, res) => {
+export async function editUserController(req: ReqMod, res: Response) {
+  try {
+    console.log('req', req.body, req.headers, req.files, req.file);
+    const { user, file } = req;
+    if (file) {
+      const newFile = fs.readFileSync(file.path);
+      console.log('file', newFile);
+      const { data, error } = await uploadImage(
+        'seat',
+        `user/${file.filename}`,
+        newFile
+      );
+      console.log(
+        '🚀 ~ file: user.controller.ts ~ line 52 ~ editUserController ~ data, error ',
+        data,
+        error
+      );
+    }
+    res.send({ message: 'Rec' });
+  } catch (error) {
+    res.send({ message: 'Ressc' });
+  } finally {
+    if (req.file) fs.unlinkSync(req.file.path);
+  }
+}
+
+export function logoutHandler(req: Request, res: Response) {
   clearTokens(res);
   res.status(201).send({ user: null });
-});
+}
 
-router.post('/login', async (req, res) => {
+export async function loginController(req: Request, res: Response) {
   try {
     const { email, password } = req.body;
     console.log('login body', req.body);
     if (!(email && password)) {
       return res.status(400).send({ message: 'improper query', data: null });
     }
-    const { code, data: user, message } = await getUser({ email });
+    const { code, data: user, message } = await getUser({ email }, null);
     if (code !== 200 || !user) {
       return res.status(code).send({ message, data: user });
     }
@@ -90,16 +115,16 @@ router.post('/login', async (req, res) => {
       .status(500)
       .send({ message: 'something went wrong', data: error });
   }
-});
+}
 
 function handleRefreshError(res: Response, status: number, message: string) {
   clearTokens(res);
   return res.status(status).send({ message });
 }
 
-router.get('/refresh', async (req, res) => {
+export async function refreshController(req: Request, res: Response) {
   try {
-    const { refresh } = req.cookies;
+    const { refresh } = req.cookies || req.headers['x-refresh-token'];
     // if (!refresh) return res.status(401).send({ message: 'unauthorized' });
     if (!refresh) return handleRefreshError(res, 401, 'unauthoized');
     const user = verify(
@@ -108,7 +133,7 @@ router.get('/refresh', async (req, res) => {
     ) as RefreshTokenPayload;
     console.log('refresh', user);
     // desearelize the token
-    const { data: userData } = await getUser({ _id: user.userId });
+    const { data: userData } = await getUser({ _id: user.userId }, null);
     console.log('user data', userData);
     // if (!userData) return res.status(404).send({ message: 'user not found' });
     if (!userData) return handleRefreshError(res, 404, 'user not found');
@@ -137,9 +162,9 @@ router.get('/refresh', async (req, res) => {
     // return res.status(500).send({ message: 'user error' });
     return handleRefreshError(res, 500, 'user error');
   }
-});
+}
 
-router.get('/check', isAuth, async (req: ReqMod, res) => {
+export async function checkUserController(req: ReqMod, res: Response) {
   const { user } = req;
   if (!user) {
     console.log('no user in check');
@@ -152,5 +177,6 @@ router.get('/check', isAuth, async (req: ReqMod, res) => {
     role: user.role,
     phone: user.phone,
     status: user.status,
+    workspaces: user.workspaces,
   });
-});
+}

@@ -1,4 +1,4 @@
-import { FilterQuery } from 'mongoose';
+import { FilterQuery, PopulateOptions } from 'mongoose';
 import workSpaceModel, {
   WorkspaceDocument,
   WorkspaceInput,
@@ -33,13 +33,16 @@ export async function getAllWorkspace(filter: FilterQuery<WorkspaceDocument>) {
   }
 }
 
-export async function getWorkspace(filter: FilterQuery<WorkspaceDocument>) {
+export async function getWorkspace(
+  filter: FilterQuery<WorkspaceDocument>,
+  populate: PopulateOptions | null
+) {
   try {
-    const data = await workSpaceModel
-      .findOne(filter)
-      .populate({ path: 'permission.user', select: 'name email' })
-      .lean()
-      .exec();
+    const query = workSpaceModel.findOne(filter);
+    if (populate) {
+      query.populate(populate);
+    }
+    const data = await query.lean().exec();
     return data;
   } catch (err) {
     console.log(err, 'fetch each');
