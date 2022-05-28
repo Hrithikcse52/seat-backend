@@ -11,6 +11,7 @@ import { router as userRoute } from './controllers/users/user.route';
 import { router as workSpaceRoute } from './controllers/workspace/workspace.route';
 import { router as metaRoute } from './controllers/meta/meta.route';
 import { router as blogRoute } from './controllers/blog/blog.route';
+import { router as postRoute } from './controllers/post/post.route';
 
 const app: Application = express();
 (async () => {
@@ -32,6 +33,7 @@ app.use('/user', userRoute);
 app.use('/workspace', workSpaceRoute);
 app.use('/meta', metaRoute);
 app.use('/blog', blogRoute);
+app.use('/post', postRoute);
 
 app.get('/', (req, res) => {
   res.send({ message: 'server is up and running' });
