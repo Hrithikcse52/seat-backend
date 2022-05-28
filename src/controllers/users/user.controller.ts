@@ -12,7 +12,7 @@ import { handleAPIError } from '../../utils/error.handler';
 
 export async function registerHandler(req: Request, res: Response) {
   try {
-    const { firstName, lastName, email, password, phone, profileImg } = req.body;
+    const { firstName, lastName, email, username, password, phone, profileImg } = req.body;
     if (!(firstName && lastName && email && password && phone)) {
       return res.status(400).send({ message: 'improper query', data: null });
     }
@@ -23,6 +23,7 @@ export async function registerHandler(req: Request, res: Response) {
       message,
     } = await createUser({
       email,
+      username,
       name: {
         firstName,
         lastName,
@@ -50,13 +51,14 @@ export async function editUserController(req: ReqMod, res: Response) {
     if (!user) {
       return res.status(500).send({ message: 'user Error' });
     }
-    const { firstName, lastName, email } = req.body;
+    const { firstName, lastName, email, username } = req.body;
     const updateDoc: {
       name?: {
         firstName?: string;
         lastName?: string;
       };
       email?: string;
+      username?: string;
       profileImg?: string;
     } = {};
     if (file && user) {
@@ -80,6 +82,9 @@ export async function editUserController(req: ReqMod, res: Response) {
     }
     // TODO://Check for unique emails
 
+    if (username) {
+      updateDoc.username = username;
+    }
     if (email) {
       updateDoc.email = email;
     }
@@ -111,7 +116,7 @@ export async function userNameValidator(req: Request, res: Response) {
     if (code !== 206) {
       return handleAPIError(res, null, 409, 'user with username already present');
     }
-    return res.send({ message: 'avail' });
+    return res.send({ message: 'username is availiable' });
   } catch (error) {
     console.log('error in usernam', error);
     return handleAPIError(res, error);
@@ -143,6 +148,7 @@ export async function loginController(req: Request, res: Response) {
         name: user.name,
         phone: user.phone,
         role: user.role,
+        username: user.username,
         profileImg: user.profileImg,
         // accessToken,
         // refreshToken,
@@ -211,6 +217,7 @@ export async function checkUserController(req: ReqMod, res: Response) {
     email: user.email,
     id: user._id,
     role: user.role,
+    username: user.username,
     phone: user.phone,
     status: user.status,
     profileImg: user.profileImg,

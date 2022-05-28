@@ -10,6 +10,7 @@ export interface UserInput {
   phone: string;
   password: string;
   profileImg: string;
+  username: string;
 }
 
 export interface UserDocument extends UserInput, Document {
