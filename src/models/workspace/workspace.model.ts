@@ -8,7 +8,7 @@ interface PermType {
           lastName: string;
         };
         email: string;
-        id: string;
+        _id: string;
       }
     | Schema.Types.ObjectId;
   role: string;
