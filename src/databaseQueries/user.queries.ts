@@ -56,12 +56,15 @@ export async function updateUser(id: string, update: UpdateQuery<UserDocument>) 
 
 export async function getUser(filter: FilterQuery<UserDocument>, populate: PopulateOptions | null) {
   try {
-    const query = userModel.findOne(filter);
+    const query = userModel.find(filter);
     if (populate) {
       query.populate(populate);
     }
     const data = await query.exec();
-    return { code: 200, data };
+    console.log('data user', data);
+    if (data && data.length === 0) return { code: 206, data: null };
+
+    return { code: 200, data: data[0] };
   } catch (err) {
     return { code: 500, data: null, err, message: 'Something went wrong' };
   }

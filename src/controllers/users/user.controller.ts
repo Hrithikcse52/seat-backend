@@ -8,10 +8,11 @@ import { clearTokens, buildTokens, setTokens } from '../../utils/token.utils';
 import { RefreshTokenPayload } from '../../types/token.types';
 import { ReqMod } from '../../types/util.types';
 import { uploadImage } from '../../lib/supabase.lib';
+import { handleAPIError } from '../../utils/error.handler';
 
 export async function registerHandler(req: Request, res: Response) {
   try {
-    const { firstName, lastName, email, password, phone, profileImg } = req.body;
+    const { firstName, lastName, email, username, password, phone, profileImg } = req.body;
     if (!(firstName && lastName && email && password && phone)) {
       return res.status(400).send({ message: 'improper query', data: null });
     }
@@ -22,6 +23,7 @@ export async function registerHandler(req: Request, res: Response) {
       message,
     } = await createUser({
       email,
+      username,
       name: {
         firstName,
         lastName,
@@ -49,13 +51,14 @@ export async function editUserController(req: ReqMod, res: Response) {
     if (!user) {
       return res.status(500).send({ message: 'user Error' });
     }
-    const { firstName, lastName, email } = req.body;
+    const { firstName, lastName, email, username } = req.body;
     const updateDoc: {
       name?: {
         firstName?: string;
         lastName?: string;
       };
       email?: string;
+      username?: string;
       profileImg?: string;
     } = {};
     if (file && user) {
@@ -79,6 +82,9 @@ export async function editUserController(req: ReqMod, res: Response) {
     }
     // TODO://Check for unique emails
 
+    if (username) {
+      updateDoc.username = username;
+    }
     if (email) {
       updateDoc.email = email;
     }
@@ -100,6 +106,23 @@ export function logoutHandler(req: Request, res: Response) {
   res.status(201).send({ user: null });
 }
 
+export async function userNameValidator(req: Request, res: Response) {
+  try {
+    const { username } = req.body;
+    if (!username) {
+      return handleAPIError(res, null, 400, 'invalid Query handler');
+    }
+    const { code } = await getUser({ username }, null);
+    if (code !== 206) {
+      return handleAPIError(res, null, 409, 'user with username already present');
+    }
+    return res.send({ message: 'username is availiable' });
+  } catch (error) {
+    console.log('error in usernam', error);
+    return handleAPIError(res, error);
+  }
+}
+
 export async function loginController(req: Request, res: Response) {
   try {
     const { email, password } = req.body;
@@ -108,9 +131,10 @@ export async function loginController(req: Request, res: Response) {
       return res.status(400).send({ message: 'improper query', data: null });
     }
     const { code, data: user, message } = await getUser({ email }, null);
-    if (code !== 200 || !user) {
-      return res.status(code).send({ message, data: user });
+    if (code !== 200 || !user || Array.isArray(user)) {
+      return res.status(code).send({ message, data: null });
     }
+
     console.log(code, user, message, 'user 54');
     const passMatch = await compare(password, user.password);
     console.log('match ', passMatch);
@@ -124,6 +148,7 @@ export async function loginController(req: Request, res: Response) {
         name: user.name,
         phone: user.phone,
         role: user.role,
+        username: user.username,
         profileImg: user.profileImg,
         // accessToken,
         // refreshToken,
@@ -155,7 +180,7 @@ export async function refreshController(req: Request, res: Response) {
     const { data: userData } = await getUser({ _id: user.userId }, null);
     console.log('user data', userData);
     // if (!userData) return res.status(404).send({ message: 'user not found' });
-    if (!userData) return handleRefreshError(res, 404, 'user not found');
+    if (!userData || Array.isArray(userData)) return handleRefreshError(res, 404, 'user not found');
     // check if the version of token matches the prev refresh token
 
     if (user.version !== userData?.tokenVersion) {
@@ -192,6 +217,7 @@ export async function checkUserController(req: ReqMod, res: Response) {
     email: user.email,
     id: user._id,
     role: user.role,
+    username: user.username,
     phone: user.phone,
     status: user.status,
     profileImg: user.profileImg,

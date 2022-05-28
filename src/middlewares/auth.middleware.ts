@@ -26,9 +26,10 @@ export async function isAuth(req: ReqMod, res: Response, next: NextFunction) {
       data: userData,
       message,
     } = await getUser({ _id: user.userId }, { path: 'workspaces', select: 'name' });
-    if (code !== 200 || !userData) {
+    if (code !== 200 || !userData || Array.isArray(userData)) {
       return res.status(code).send({ user: null, message });
     }
+
     req.user = userData;
     return next();
   } catch (error) {

@@ -10,6 +10,7 @@ export interface UserInput {
   phone: string;
   password: string;
   profileImg: string;
+  username: string;
 }
 
 export interface UserDocument extends UserInput, Document {
@@ -31,6 +32,10 @@ const userSchema = new Schema(
       lastName: {
         type: String,
       },
+    },
+    username: {
+      type: String,
+      required: true,
     },
     email: {
       type: String,
