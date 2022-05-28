@@ -8,6 +8,7 @@ import { clearTokens, buildTokens, setTokens } from '../../utils/token.utils';
 import { RefreshTokenPayload } from '../../types/token.types';
 import { ReqMod } from '../../types/util.types';
 import { uploadImage } from '../../lib/supabase.lib';
+import { handleAPIError } from '../../utils/error.handler';
 
 export async function registerHandler(req: Request, res: Response) {
   try {
@@ -100,6 +101,23 @@ export function logoutHandler(req: Request, res: Response) {
   res.status(201).send({ user: null });
 }
 
+export async function userNameValidator(req: Request, res: Response) {
+  try {
+    const { username } = req.body;
+    if (!username) {
+      return handleAPIError(res, null, 400, 'invalid Query handler');
+    }
+    const { code } = await getUser({ username }, null);
+    if (code !== 206) {
+      return handleAPIError(res, null, 409, 'user with username already present');
+    }
+    return res.send({ message: 'avail' });
+  } catch (error) {
+    console.log('error in usernam', error);
+    return handleAPIError(res, error);
+  }
+}
+
 export async function loginController(req: Request, res: Response) {
   try {
     const { email, password } = req.body;
@@ -108,9 +126,10 @@ export async function loginController(req: Request, res: Response) {
       return res.status(400).send({ message: 'improper query', data: null });
     }
     const { code, data: user, message } = await getUser({ email }, null);
-    if (code !== 200 || !user) {
-      return res.status(code).send({ message, data: user });
+    if (code !== 200 || !user || Array.isArray(user)) {
+      return res.status(code).send({ message, data: null });
     }
+
     console.log(code, user, message, 'user 54');
     const passMatch = await compare(password, user.password);
     console.log('match ', passMatch);
@@ -155,7 +174,7 @@ export async function refreshController(req: Request, res: Response) {
     const { data: userData } = await getUser({ _id: user.userId }, null);
     console.log('user data', userData);
     // if (!userData) return res.status(404).send({ message: 'user not found' });
-    if (!userData) return handleRefreshError(res, 404, 'user not found');
+    if (!userData || Array.isArray(userData)) return handleRefreshError(res, 404, 'user not found');
     // check if the version of token matches the prev refresh token
 
     if (user.version !== userData?.tokenVersion) {
