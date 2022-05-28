@@ -125,12 +125,17 @@ export async function userNameValidator(req: Request, res: Response) {
 
 export async function loginController(req: Request, res: Response) {
   try {
-    const { email, password } = req.body;
+    const { emailOrusername, password } = req.body;
     console.log('login body', req.body);
-    if (!(email && password)) {
+    if (!(emailOrusername && password)) {
       return res.status(400).send({ message: 'improper query', data: null });
     }
-    const { code, data: user, message } = await getUser({ email }, null);
+    console.log('usernmae', emailOrusername);
+    const {
+      code,
+      data: user,
+      message,
+    } = await getUser({ $or: [{ email: emailOrusername }, { username: emailOrusername }] }, null);
     if (code !== 200 || !user || Array.isArray(user)) {
       return res.status(code).send({ message, data: null });
     }
