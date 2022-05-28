@@ -23,7 +23,7 @@ export async function create(req: ReqMod, res: Response) {
 
 export async function index(req: ReqMod, res: Response) {
   try {
-    const { code, data, ...rest } = await getPost({}, { path: 'createdBy', select: 'username' });
+    const { code, data, ...rest } = await getPost({}, { path: 'createdBy', select: 'username name profileImg' });
     if (code !== 200 || !data) {
       return res.status(code).send({ message: rest.message || 'something went wring' });
     }
