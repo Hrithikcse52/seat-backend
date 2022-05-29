@@ -8,6 +8,15 @@ interface Reaction {
       }
     | Schema.Types.ObjectId;
 }
+interface ReactionComment {
+  user:
+    | {
+        username: string;
+        _id: Schema.Types.ObjectId;
+      }
+    | Schema.Types.ObjectId;
+  message: string;
+}
 
 export interface PostInput {
   postDataHTML: string;
@@ -17,49 +26,44 @@ export interface PostInput {
 
 export interface PostDocument extends PostInput, Document {
   likes: Reaction[];
-  comments: Reaction[];
+  comments: ReactionComment[];
   createdAt: Date;
   updatedAt: Date;
 }
 
-const postSchema = new Schema({
-  postDataHTML: {
-    type: String,
-  },
-  postDataRaw: {
-    type: [],
-  },
+const postSchema = new Schema(
+  {
+    postDataHTML: {
+      type: String,
+    },
+    postDataRaw: {
+      type: [],
+    },
 
-  createdBy: {
-    type: Schema.Types.ObjectId,
-    ref: 'users',
-  },
-  likes: [
-    {
+    createdBy: {
       type: Schema.Types.ObjectId,
       ref: 'users',
     },
-  ],
-  comments: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'users',
-    },
-  ],
-  created: {
-    type: Date,
-    default: Date.now,
+    likes: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'users',
+      },
+    ],
+    comments: [
+      {
+        user: {
+          type: Schema.Types.ObjectId,
+          ref: 'users',
+        },
+        message: {
+          type: String,
+        },
+      },
+    ],
   },
-  updated: {
-    type: Date,
-    default: Date.now,
-  },
-});
-
-postSchema.pre('save', function preSave(next) {
-  this.modified = Date.now();
-  next();
-});
+  { timestamps: true }
+);
 
 const postModel = model<PostDocument>('posts', postSchema);
 export default postModel;
