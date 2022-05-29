@@ -54,11 +54,18 @@ export async function updateUser(id: string, update: UpdateQuery<UserDocument>) 
   }
 }
 
-export async function getUser(filter: FilterQuery<UserDocument>, populate: PopulateOptions | null) {
+export async function getUser(
+  filter: FilterQuery<UserDocument>,
+  populate: PopulateOptions | null,
+  select: string | null = null
+) {
   try {
     const query = userModel.find(filter);
     if (populate) {
       query.populate(populate);
+    }
+    if (select) {
+      query.select(select);
     }
     const data = await query.exec();
     console.log('data user', data);
