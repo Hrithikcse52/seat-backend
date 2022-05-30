@@ -10,12 +10,14 @@ export interface UserInput {
   phone: string;
   password: string;
   profileImg: string;
+
   username: string;
 }
 
 export interface UserDocument extends UserInput, Document {
   workspaces: Array<WorkspaceDocument | WorkspaceDocument['_id']>;
   status: string;
+  ogImage: string;
   tokenVersion: number;
   role: string;
   createdAt: Date;
@@ -56,6 +58,7 @@ const userSchema = new Schema(
       required: true,
     },
     profileImg: String,
+    ogImage: String,
     workspaces: [
       {
         type: Schema.Types.ObjectId,

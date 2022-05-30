@@ -1,8 +1,12 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-param-reassign */
 import { Request, Response } from 'express';
 import { hash, compare } from 'bcrypt';
-import fs from 'fs';
+import { CanvasRenderingContext2D, createCanvas, loadImage } from 'canvas';
+import fs, { createWriteStream } from 'fs';
+import path from 'path';
 import { verify } from 'jsonwebtoken';
-import { FRONT_END_URL, REFRESH_TOKEN_SECRET } from '../../config';
+import { FRONT_END_URL, REFRESH_TOKEN_SECRET, ROOT } from '../../config';
 import { createUser, getUser, incTokenVersion, updateUser } from '../../databaseQueries/user.queries';
 import { clearTokens, buildTokens, setTokens } from '../../utils/token.utils';
 import { RefreshTokenPayload } from '../../types/token.types';
@@ -44,6 +48,70 @@ export async function registerHandler(req: Request, res: Response) {
   }
 }
 
+function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  if (w < 2 * r) r = w / 2;
+  if (h < 2 * r) r = h / 2;
+
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+export async function createOG(userImage: string) {
+  const canvas = createCanvas(1200, 630);
+  const ctx = canvas.getContext('2d');
+  const bgImage = await loadImage(
+    'https://us-central1-centered-1580668301240.cloudfunctions.net/randomPhoto?collectionId=j1fwrKAGDIg'
+  );
+
+  // center fill
+  const hRatio = canvas.width / bgImage.width;
+  const vRatio = canvas.height / bgImage.height;
+  const ratio = Math.max(hRatio, vRatio);
+  const centerShiftX = (canvas.width - bgImage.width * ratio) / 2;
+  const centerShiftY = (canvas.height - bgImage.height * ratio) / 2;
+
+  ctx.drawImage(
+    bgImage,
+    0,
+    0,
+    bgImage.width,
+    bgImage.height,
+    centerShiftX,
+    centerShiftY,
+    bgImage.width * ratio,
+    bgImage.height * ratio
+  );
+
+  ctx.rect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#000000aa';
+  ctx.fill();
+
+  const posterImage = await loadImage(userImage);
+
+  ctx.save();
+
+  roundedRect(ctx, 814, 51, 336, 528, 10);
+
+  ctx.clip();
+
+  ctx.drawImage(posterImage, 814, 51, 336, 528);
+
+  ctx.restore();
+
+  const logoImage = await loadImage(
+    'https://wxmwctiasizeoqlubrjn.supabase.co/storage/v1/object/public/seat/logo/Membook(2).svg'
+  );
+
+  ctx.drawImage(logoImage, 121, 252, 462, 114);
+  const ogImage = createWriteStream(path.join(ROOT, '/uploads/ogimage.png'));
+  canvas.createPNGStream().pipe(ogImage);
+}
+
 export async function editUserController(req: ReqMod, res: Response) {
   try {
     console.log('req', req.body, req.headers, req.files, req.file);
@@ -60,6 +128,7 @@ export async function editUserController(req: ReqMod, res: Response) {
       email?: string;
       username?: string;
       profileImg?: string;
+      ogImage?: string;
     } = {};
     if (file && user) {
       const newFile = fs.readFileSync(file.path);
@@ -70,6 +139,21 @@ export async function editUserController(req: ReqMod, res: Response) {
         return res.status(500).send({ message: 'Something went Wring', error });
       }
       updateDoc.profileImg = data.publicURL;
+      await createOG(updateDoc.profileImg);
+      const ogImageFile = fs.readFileSync(path.join(ROOT, '/uploads/ogimage.png'));
+
+      const { data: ogData, error: ogErr } = await uploadImage(
+        'seat',
+        `ogImage/${user._id}/`,
+        `${Date.now()}_${user._id}`,
+        null,
+        ogImageFile
+      );
+      console.log('ogdata', ogData, ogErr);
+      if (ogData) {
+        updateDoc.ogImage = ogData.publicURL;
+        fs.unlinkSync(path.join(ROOT, '/uploads/ogimage.png'));
+      }
     }
     if (firstName || lastName) {
       updateDoc.name = {};
