@@ -104,7 +104,7 @@ export async function createOG(userImage: string) {
   ctx.restore();
 
   const logoImage = await loadImage(
-    'https://wxmwctiasizeoqlubrjn.supabase.co/storage/v1/object/public/seat/logo/Membook(2).svg'
+    'https://wxmwctiasizeoqlubrjn.supabase.co/storage/v1/object/public/seat/logo/membook.svg'
   );
 
   ctx.drawImage(logoImage, 121, 252, 462, 114);
