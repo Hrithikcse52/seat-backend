@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 
-interface Reaction {
+export interface Reaction {
   user:
     | {
         username: string;
@@ -8,7 +8,7 @@ interface Reaction {
       }
     | Schema.Types.ObjectId;
 }
-interface ReactionComment {
+export interface ReactionComment {
   user:
     | {
         username: string;

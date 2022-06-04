@@ -18,7 +18,7 @@ export async function indexController(req: ReqMod, res: Response) {
   if (!user) {
     return res.status(401).send({ user: null, message: 'Login' });
   }
-  const data = await getAllWorkspace({ 'permission.user': user._id });
+  const data = await getAllWorkspace({ createdBy: user._id });
   return res.send(data);
 }
 
