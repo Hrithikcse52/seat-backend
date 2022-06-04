@@ -1,4 +1,5 @@
 import { Schema, model } from 'mongoose';
+import { Reaction, ReactionComment } from '../post/post.model';
 
 export interface BlogInput {
   blogDataHTML: string;
@@ -8,6 +9,8 @@ export interface BlogInput {
 }
 
 export interface BlogDocument extends BlogInput, Document {
+  likes: Reaction[];
+  comments: ReactionComment[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -28,6 +31,23 @@ const blogSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'workspaces',
     },
+    likes: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'users',
+      },
+    ],
+    comments: [
+      {
+        user: {
+          type: Schema.Types.ObjectId,
+          ref: 'users',
+        },
+        message: {
+          type: String,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
