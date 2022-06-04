@@ -13,7 +13,7 @@ export async function uploadImage(
   const { data } = await supabase.storage.from(bucket).list(dir);
   let finalName = '';
   const cacheControl = {
-    cacheControl: '3600',
+    cacheControl: '0',
     contentType: 'image/png',
   };
   if (orgFile) {
@@ -24,8 +24,9 @@ export async function uploadImage(
   if (data && data.length > 0) {
     await supabase.storage.from(bucket).update(dir + data[0].name, file, cacheControl);
     finalName = dir + data[0].name;
+  } else {
+    await supabase.storage.from(bucket).upload(dir + filename, file, cacheControl);
+    finalName = dir + filename;
   }
-  await supabase.storage.from(bucket).upload(dir + filename, file, cacheControl);
-  finalName = dir + filename;
   return supabase.storage.from(bucket).getPublicUrl(finalName);
 }

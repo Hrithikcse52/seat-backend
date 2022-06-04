@@ -16,8 +16,8 @@ import { handleAPIError } from '../../utils/error.handler';
 
 export async function registerHandler(req: Request, res: Response) {
   try {
-    const { firstName, lastName, email, username, password, phone, profileImg } = req.body;
-    if (!(firstName && lastName && email && password && phone)) {
+    const { firstName, lastName, email, username, password, profileImg } = req.body;
+    if (!(firstName && lastName && email && password && username)) {
       return res.status(400).send({ message: 'improper query', data: null });
     }
     const encryptPass = await hash(password, 10);
@@ -33,8 +33,6 @@ export async function registerHandler(req: Request, res: Response) {
         lastName,
       },
       profileImg,
-      phone,
-
       password: encryptPass,
     });
     console.log(code, user, message, 'user 35');
@@ -61,7 +59,7 @@ function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: num
   ctx.closePath();
 }
 
-export async function createOG(userImage: string) {
+export async function createOG(userImage: string, username: string) {
   const canvas = createCanvas(1200, 630);
   const ctx = canvas.getContext('2d');
   const bgImage = await loadImage(
@@ -104,12 +102,11 @@ export async function createOG(userImage: string) {
   ctx.restore();
 
   const logoImage = await loadImage(
-    'https://wxmwctiasizeoqlubrjn.supabase.co/storage/v1/object/public/seat/logo/Membook(2).svg'
+    'https://wxmwctiasizeoqlubrjn.supabase.co/storage/v1/object/public/seat/logo/membook.svg'
   );
 
   ctx.drawImage(logoImage, 121, 252, 462, 114);
-  const ogImage = createWriteStream(path.join(ROOT, '/uploads/ogimage.png'));
-  canvas.createPNGStream().pipe(ogImage);
+  return canvas.toBuffer();
 }
 
 export async function editUserController(req: ReqMod, res: Response) {
@@ -119,32 +116,36 @@ export async function editUserController(req: ReqMod, res: Response) {
     if (!user) {
       return res.status(500).send({ message: 'user Error' });
     }
-    const { firstName, lastName, email, username } = req.body;
+    const { firstName, lastName, email } = req.body;
     const updateDoc: {
       name?: {
         firstName?: string;
         lastName?: string;
       };
       email?: string;
-      username?: string;
       profileImg?: string;
       ogImage?: string;
     } = {};
     if (file && user) {
       const newFile = fs.readFileSync(file.path);
       console.log('file', newFile);
-      const { data, error } = await uploadImage('seat', `user/${user._id}/`, file.filename, file, newFile);
+      const { data, error } = await uploadImage(
+        'seat',
+        `users/${`${user.username}_${user._id}`}/`,
+        file.filename,
+        file,
+        newFile
+      );
       console.log('data', data, error);
       if (!data || error) {
         return res.status(500).send({ message: 'Something went Wring', error });
       }
       updateDoc.profileImg = data.publicURL;
-      await createOG(updateDoc.profileImg);
-      const ogImageFile = fs.readFileSync(path.join(ROOT, '/uploads/ogimage.png'));
+      const ogImageFile = await createOG(updateDoc.profileImg, user.username);
 
       const { data: ogData, error: ogErr } = await uploadImage(
         'seat',
-        `ogImage/${user._id}/`,
+        `ogImages/${`${user.username}_${user._id}`}/`,
         `${Date.now()}_${user._id}`,
         null,
         ogImageFile
@@ -152,7 +153,6 @@ export async function editUserController(req: ReqMod, res: Response) {
       console.log('ogdata', ogData, ogErr);
       if (ogData) {
         updateDoc.ogImage = ogData.publicURL;
-        fs.unlinkSync(path.join(ROOT, '/uploads/ogimage.png'));
       }
     }
     if (firstName || lastName) {
@@ -165,10 +165,6 @@ export async function editUserController(req: ReqMod, res: Response) {
       }
     }
     // TODO://Check for unique emails
-
-    if (username) {
-      updateDoc.username = username;
-    }
     if (email) {
       updateDoc.email = email;
     }
@@ -232,10 +228,9 @@ export async function loginController(req: Request, res: Response) {
       console.log('called token creattion', accessToken, refreshToken);
       setTokens(res, accessToken, refreshToken);
       return res.send({
-        id: user._id,
+        _id: user._id,
         email: user.email,
         name: user.name,
-        phone: user.phone,
         role: user.role,
         username: user.username,
         profileImg: user.profileImg,
@@ -304,10 +299,9 @@ export async function checkUserController(req: ReqMod, res: Response) {
   return res.send({
     name: user.name,
     email: user.email,
-    id: user._id,
+    _id: user._id,
     role: user.role,
     username: user.username,
-    phone: user.phone,
     status: user.status,
     profileImg: user.profileImg,
     workspaces: user.workspaces,

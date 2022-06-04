@@ -7,10 +7,8 @@ export interface UserInput {
     firstName: string;
     lastName: string;
   };
-  phone: string;
   password: string;
   profileImg: string;
-
   username: string;
 }
 
@@ -40,11 +38,6 @@ const userSchema = new Schema(
       required: true,
     },
     email: {
-      type: String,
-      unique: true,
-      required: true,
-    },
-    phone: {
       type: String,
       unique: true,
       required: true,
