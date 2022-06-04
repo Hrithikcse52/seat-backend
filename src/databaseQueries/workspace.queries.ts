@@ -29,6 +29,15 @@ export async function getAllWorkspace(filter: FilterQuery<WorkspaceDocument>) {
     return null;
   }
 }
+export async function addSpaceMember(id: string, user: string) {
+  try {
+    const updUser = await workSpaceModel.findByIdAndUpdate(id, { $push: { members: user } }).exec();
+    return { code: 200, data: updUser };
+  } catch (err) {
+    console.log('errro  on p=joinin workspace');
+    return { code: 500, data: null, message: 'Upadte user Went wrong' };
+  }
+}
 
 export async function getWorkspace(filter: FilterQuery<WorkspaceDocument>, populate: PopulateOptions | null) {
   try {

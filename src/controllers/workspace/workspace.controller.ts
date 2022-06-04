@@ -1,9 +1,15 @@
 import { Response, Router, Request } from 'express';
 import { ObjectId } from 'mongoose';
-import { createWorkSpace, getAllWorkspace, getWorkspace } from '../../databaseQueries/workspace.queries';
+import { isEqual } from 'lodash';
+import {
+  addSpaceMember,
+  createWorkSpace,
+  getAllWorkspace,
+  getWorkspace,
+} from '../../databaseQueries/workspace.queries';
 import { ReqMod } from '../../types/util.types';
-import { WorkspaceInput } from '../../models/workspace/workspace.model';
-import { addWorkspaceUser } from '../../databaseQueries/user.queries';
+import workSpaceModel, { WorkspaceInput } from '../../models/workspace/workspace.model';
+import { handleAPIError } from '../../utils/error.handler';
 
 export const router = Router();
 
@@ -18,10 +24,13 @@ export async function indexController(req: ReqMod, res: Response) {
 
 export async function exploreData(_: Request, res: Response) {
   try {
-    const data = await getAllWorkspace({
-      status: 'active',
-      $or: [{ type: 'public' }, { type: 'approval_based' }],
-    });
+    const data = await workSpaceModel
+      .find({ status: 'active', $or: [{ type: 'public' }, { type: 'approval_based' }] })
+      .populate('members', 'name email profileImg username');
+    // const data = await getAllWorkspace({
+    //   status: 'active',
+    //   $or: [{ type: 'public' }, { type: 'approval_based' }],
+    // });
     console.log('data', data);
     return res.send(data);
   } catch (error) {
@@ -38,14 +47,13 @@ export async function createController(req: ReqMod, res: Response) {
       return res.status(401).send({ user: null, message: 'login' });
     }
     // TODO: Name should be unique do not run mongodb validation run self validation.
-    const permission = [{ user: user._id as ObjectId, role: 'admin' }];
     const payload: WorkspaceInput = {
       name,
       description,
       type,
       address: location,
       // membership,
-      permission,
+      members: user._id,
       createdBy: user._id,
       modifiedBy: user._id,
     };
@@ -66,7 +74,11 @@ export async function createController(req: ReqMod, res: Response) {
 
 export async function getWorkspaceController(req: ReqMod, res: Response) {
   const { id } = req.params;
-  const data = await getWorkspace({ _id: id }, { path: 'permission.user', select: 'name email' });
+  // const data = await getWorkspace({ _id: id }, { path: 'permission.user', select: 'name email' });
+  const data = await workSpaceModel
+    .findOne({ _id: id })
+    .populate({ path: 'members', select: 'name email profileImg username' })
+    .exec();
   console.log('🚀 ~ file: workspace.controller.ts ~ line 81 ~ getWorkspaceController ~ data', data);
 
   // TODO://Filter data to be sent
@@ -80,27 +92,25 @@ export async function getWorkspaceController(req: ReqMod, res: Response) {
 export async function workspaceJoinController(req: ReqMod, res: Response) {
   try {
     const { workspace, role = 'user' }: { workspace: string; role?: string } = req.body;
-    const { user } = req;
+    const { user, workspaceData } = req;
     if (!user) {
       return res.status(401).send({ message: 'Do Login to join a space' });
     }
-    if (user.workspaces && user.workspaces.find((space) => space.toString() === workspace)) {
-      console.log('already a memner');
+    if (!workspaceData) return handleAPIError(res, null, 500, 'searilize wrksp went wrong');
+
+    if (workspaceData.members.find((mem) => isEqual(mem._id, user._id))) {
+      console.log('already a member');
       return res.status(409).send({ message: 'already a memeber' });
     }
-    const workspaceDetails = await getWorkspace({ _id: workspace }, null);
-    // check for user is already a admin or manager for that workspace
-    if (!workspaceDetails) {
-      return res.status(500).send({ message: 'no workspace found' });
-    }
-    console.log('workspace deata', workspaceDetails.permission, workspace);
 
-    if (workspaceDetails.permission.find((usr) => usr.user.toString() === user._id.toString())) {
-      return res.status(409).send({ message: 'already a management member' });
-    }
+    // if (workspaceData.permission.find((per) => isEqual(per.user, user._id))) {
+    //   console.log('already a mgmt member');
+    //   return handleAPIError(res, null, 409, 'already a management member');
+    // }
 
     if (role === 'user') {
-      const { code, data, ...restData } = await addWorkspaceUser(user._id, workspace);
+      const { code, data, ...restData } = await addSpaceMember(workspace, user._id);
+      // const { code, data, ...restData } = await addWorkspaceUser(user._id, workspace);
       if (code !== 200) {
         return res.status(code).send({ message: restData.message });
       }

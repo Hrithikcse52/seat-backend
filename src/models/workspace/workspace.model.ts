@@ -1,29 +1,31 @@
 import { Schema, model, Document } from 'mongoose';
+import { UserDocument } from '../users/user.model';
 
-interface PermType {
-  user:
-    | {
-        name: {
-          firstName: string;
-          lastName: string;
-        };
-        email: string;
-        _id: string;
-      }
-    | Schema.Types.ObjectId;
-  role: string;
-}
+// interface PermType {
+//   user:
+//     | {
+//         name: {
+//           firstName: string;
+//           lastName: string;
+//         };
+//         email: string;
+//         _id: string;
+//       }
+//     | Schema.Types.ObjectId;
+//   role: string;
+// }
 
 export interface WorkspaceInput {
   name: string;
   description: string;
   address: string;
-  membership?: {
-    amount: number;
-    currenct: string;
-  };
+  // membership?: {
+  //   amount: number;
+  //   currenct: string;
+  // };
+  members: Schema.Types.ObjectId[];
   type: string;
-  permission: PermType[];
+  // permission: PermType[];
   createdBy: Schema.Types.ObjectId;
   modifiedBy: Schema.Types.ObjectId;
 }
@@ -62,24 +64,30 @@ const workSpaceSchema = new Schema<WorkspaceDocument>(
       enum: ['active', 'email_not_verified', 'phone_not_verified', 'not_verified'],
       default: 'not_verified',
     },
-    membership: {
-      amount: Number,
-      currency: String,
-    },
-    permission: [
+    members: [
       {
-        user: {
-          type: Schema.Types.ObjectId,
-          ref: 'users',
-          required: true,
-        },
-        role: {
-          type: String,
-          enum: ['admin', 'manager'],
-          default: 'manager',
-        },
+        type: Schema.Types.ObjectId,
+        ref: 'users',
       },
     ],
+    // membership: {
+    //   amount: Number,
+    //   currency: String,
+    // },
+    // permission: [
+    //   {
+    //     user: {
+    //       type: Schema.Types.ObjectId,
+    //       ref: 'users',
+    //       required: true,
+    //     },
+    //     role: {
+    //       type: String,
+    //       enum: ['admin', 'manager'],
+    //       default: 'manager',
+    //     },
+    //   },
+    // ],
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: 'users',

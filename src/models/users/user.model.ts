@@ -1,5 +1,5 @@
-import { Schema, model, Document } from 'mongoose';
-import { WorkspaceDocument } from '../workspace/workspace.model';
+import { Schema, model, Document, ObjectId } from 'mongoose';
+// import { WorkspaceDocument } from '../workspace/workspace.model';
 
 export interface UserInput {
   email: string;
@@ -13,7 +13,7 @@ export interface UserInput {
 }
 
 export interface UserDocument extends UserInput, Document {
-  workspaces: Array<WorkspaceDocument | WorkspaceDocument['_id']>;
+  // workspaces: Array<WorkspaceDocument | WorkspaceDocument['_id']>;
   status: string;
   ogImage: string;
   tokenVersion: number;
@@ -52,12 +52,12 @@ const userSchema = new Schema(
     },
     profileImg: String,
     ogImage: String,
-    workspaces: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'workspaces',
-      },
-    ],
+    // workspaces: [
+    //   {
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'workspaces',
+    //   },
+    // ],
     status: {
       type: String,
       enum: ['active', 'email_not_verified', 'phone_not_verified', 'not_verified'],
