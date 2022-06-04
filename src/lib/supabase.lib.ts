@@ -13,7 +13,7 @@ export async function uploadImage(
   const { data } = await supabase.storage.from(bucket).list(dir);
   let finalName = '';
   const cacheControl = {
-    cacheControl: '30',
+    cacheControl: '0',
     contentType: 'image/png',
   };
   if (orgFile) {

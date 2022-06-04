@@ -129,7 +129,13 @@ export async function editUserController(req: ReqMod, res: Response) {
     if (file && user) {
       const newFile = fs.readFileSync(file.path);
       console.log('file', newFile);
-      const { data, error } = await uploadImage('seat', `user/${user._id}/`, file.filename, file, newFile);
+      const { data, error } = await uploadImage(
+        'seat',
+        `users/${`${user.username}_${user._id}`}/`,
+        file.filename,
+        file,
+        newFile
+      );
       console.log('data', data, error);
       if (!data || error) {
         return res.status(500).send({ message: 'Something went Wring', error });
@@ -139,7 +145,7 @@ export async function editUserController(req: ReqMod, res: Response) {
 
       const { data: ogData, error: ogErr } = await uploadImage(
         'seat',
-        `ogImage/${user._id}/`,
+        `ogImages/${`${user.username}_${user._id}`}/`,
         `${Date.now()}_${user._id}`,
         null,
         ogImageFile
@@ -222,7 +228,7 @@ export async function loginController(req: Request, res: Response) {
       console.log('called token creattion', accessToken, refreshToken);
       setTokens(res, accessToken, refreshToken);
       return res.send({
-        id: user._id,
+        _id: user._id,
         email: user.email,
         name: user.name,
         role: user.role,
@@ -293,7 +299,7 @@ export async function checkUserController(req: ReqMod, res: Response) {
   return res.send({
     name: user.name,
     email: user.email,
-    id: user._id,
+    _id: user._id,
     role: user.role,
     username: user.username,
     status: user.status,
