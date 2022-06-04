@@ -304,6 +304,5 @@ export async function checkUserController(req: ReqMod, res: Response) {
     username: user.username,
     status: user.status,
     profileImg: user.profileImg,
-    workspaces: user.workspaces,
   });
 }

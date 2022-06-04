@@ -56,7 +56,7 @@ export async function updateUser(id: string, update: UpdateQuery<UserDocument>) 
 
 export async function getUser(
   filter: FilterQuery<UserDocument>,
-  populate: PopulateOptions | null,
+  populate: PopulateOptions | null = null,
   select: string | null = null
 ) {
   try {
@@ -74,17 +74,6 @@ export async function getUser(
     return { code: 200, data: data[0] };
   } catch (err) {
     return { code: 500, data: null, err, message: 'Something went wrong' };
-  }
-}
-
-export async function addWorkspaceUser(id: string, workspace: string) {
-  try {
-    const updUser = await userModel.findByIdAndUpdate(id, { $push: { workspaces: workspace } }).exec();
-
-    return { code: 200, data: updUser };
-  } catch (err) {
-    console.log('errro  on p=joinin workspace');
-    return { code: 500, data: null, message: 'Upadte user Went wrong' };
   }
 }
 

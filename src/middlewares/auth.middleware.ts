@@ -4,6 +4,7 @@ import { ACCESS_TOKEN_SECRET } from '../config';
 import { getUser } from '../databaseQueries/user.queries';
 import { AccessTokenPayload } from '../types/token.types';
 import { ReqMod } from '../types/util.types';
+import { handleAPIError } from '../utils/error.handler';
 
 export async function isAuth(req: ReqMod, res: Response, next: NextFunction) {
   const access = req.cookies.access || req.headers['x-access-token'];
@@ -21,11 +22,8 @@ export async function isAuth(req: ReqMod, res: Response, next: NextFunction) {
     if (!user) {
       return res.status(401).send({ user: null, message: 'invalid token' });
     }
-    const {
-      code,
-      data: userData,
-      message,
-    } = await getUser({ _id: user.userId }, { path: 'workspaces', select: 'name' });
+    const { code, data: userData, message } = await getUser({ _id: user.userId });
+    console.log('user', code, userData, message);
     if (code !== 200 || !userData || Array.isArray(userData)) {
       return res.status(code).send({ user: null, message });
     }
@@ -33,7 +31,9 @@ export async function isAuth(req: ReqMod, res: Response, next: NextFunction) {
     req.user = userData;
     return next();
   } catch (error) {
-    return res.status(500).send({ user: null, message: 'Something went wrong!' });
+    console.log('error on check ', error);
+    // return res.status(500).send({ user: null, message: 'Something went wrong!' });
+    return handleAPIError(res, error, 500, 'something went wrong');
   }
 }
 
