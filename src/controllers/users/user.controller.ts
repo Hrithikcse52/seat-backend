@@ -16,8 +16,8 @@ import { handleAPIError } from '../../utils/error.handler';
 
 export async function registerHandler(req: Request, res: Response) {
   try {
-    const { firstName, lastName, email, username, password, phone, profileImg } = req.body;
-    if (!(firstName && lastName && email && password && phone)) {
+    const { firstName, lastName, email, username, password, profileImg } = req.body;
+    if (!(firstName && lastName && email && password && username)) {
       return res.status(400).send({ message: 'improper query', data: null });
     }
     const encryptPass = await hash(password, 10);
@@ -33,8 +33,6 @@ export async function registerHandler(req: Request, res: Response) {
         lastName,
       },
       profileImg,
-      phone,
-
       password: encryptPass,
     });
     console.log(code, user, message, 'user 35');
@@ -61,7 +59,7 @@ function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: num
   ctx.closePath();
 }
 
-export async function createOG(userImage: string) {
+export async function createOG(userImage: string, username: string) {
   const canvas = createCanvas(1200, 630);
   const ctx = canvas.getContext('2d');
   const bgImage = await loadImage(
@@ -108,8 +106,7 @@ export async function createOG(userImage: string) {
   );
 
   ctx.drawImage(logoImage, 121, 252, 462, 114);
-  const ogImage = createWriteStream(path.join(ROOT, '/uploads/ogimage.png'));
-  canvas.createPNGStream().pipe(ogImage);
+  return canvas.toBuffer();
 }
 
 export async function editUserController(req: ReqMod, res: Response) {
@@ -119,14 +116,13 @@ export async function editUserController(req: ReqMod, res: Response) {
     if (!user) {
       return res.status(500).send({ message: 'user Error' });
     }
-    const { firstName, lastName, email, username } = req.body;
+    const { firstName, lastName, email } = req.body;
     const updateDoc: {
       name?: {
         firstName?: string;
         lastName?: string;
       };
       email?: string;
-      username?: string;
       profileImg?: string;
       ogImage?: string;
     } = {};
@@ -139,8 +135,7 @@ export async function editUserController(req: ReqMod, res: Response) {
         return res.status(500).send({ message: 'Something went Wring', error });
       }
       updateDoc.profileImg = data.publicURL;
-      await createOG(updateDoc.profileImg);
-      const ogImageFile = fs.readFileSync(path.join(ROOT, '/uploads/ogimage.png'));
+      const ogImageFile = await createOG(updateDoc.profileImg, user.username);
 
       const { data: ogData, error: ogErr } = await uploadImage(
         'seat',
@@ -152,7 +147,6 @@ export async function editUserController(req: ReqMod, res: Response) {
       console.log('ogdata', ogData, ogErr);
       if (ogData) {
         updateDoc.ogImage = ogData.publicURL;
-        fs.unlinkSync(path.join(ROOT, '/uploads/ogimage.png'));
       }
     }
     if (firstName || lastName) {
@@ -165,10 +159,6 @@ export async function editUserController(req: ReqMod, res: Response) {
       }
     }
     // TODO://Check for unique emails
-
-    if (username) {
-      updateDoc.username = username;
-    }
     if (email) {
       updateDoc.email = email;
     }
@@ -235,7 +225,6 @@ export async function loginController(req: Request, res: Response) {
         id: user._id,
         email: user.email,
         name: user.name,
-        phone: user.phone,
         role: user.role,
         username: user.username,
         profileImg: user.profileImg,
@@ -307,7 +296,6 @@ export async function checkUserController(req: ReqMod, res: Response) {
     id: user._id,
     role: user.role,
     username: user.username,
-    phone: user.phone,
     status: user.status,
     profileImg: user.profileImg,
     workspaces: user.workspaces,

@@ -24,4 +24,4 @@ router.post('/username', userNameValidator);
 router.get('/refresh', refreshController);
 router.post('/edit', isAuth, upload.single('image'), editUserController);
 router.get('/check', isAuth, checkUserController);
-router.get('/og', createOG);
+// router.get('/og', createOG);
