@@ -68,7 +68,6 @@ export async function getUser(
       query.select(select);
     }
     const data = await query.exec();
-    console.log('data user', data);
     if (data && data.length === 0) return { code: 206, data: null };
 
     return { code: 200, data: data[0] };

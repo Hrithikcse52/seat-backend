@@ -23,7 +23,6 @@ export async function isAuth(req: ReqMod, res: Response, next: NextFunction) {
       return res.status(401).send({ user: null, message: 'invalid token' });
     }
     const { code, data: userData, message } = await getUser({ _id: user.userId });
-    console.log('user', code, userData, message);
     if (code !== 200 || !userData || Array.isArray(userData)) {
       return res.status(code).send({ user: null, message });
     }
