@@ -9,12 +9,14 @@ import { handleAPIError } from '../utils/error.handler';
 export async function isAuth(req: ReqMod, res: Response, next: NextFunction) {
   const access = req.cookies.access || req.headers['x-access-token'];
   const refresh = req.cookies.refresh || req.headers['x-refresh-token'];
+  console.log('acess', access, refresh);
   if (!access && refresh) {
     // Refresh the tokens
     return res.status(403).send({ user: null });
   }
-  if (!(access && refresh)) {
+  if (!access && !refresh) {
     // Dont refresh the tokens
+    console.log('dont have access or refresh token');
     return res.status(401).send({ message: 'do login' });
   }
   try {
