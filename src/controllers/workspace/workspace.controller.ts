@@ -8,7 +8,7 @@ import {
   getWorkspace,
 } from '../../databaseQueries/workspace.queries';
 import { ReqMod } from '../../types/util.types';
-import workSpaceModel, { WorkspaceInput } from '../../models/workspace/workspace.model';
+import workSpaceModel, { WorkspaceInput } from '../../models/workspace.model';
 import { handleAPIError } from '../../utils/error.handler';
 
 export const router = Router();

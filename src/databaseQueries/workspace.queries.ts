@@ -1,5 +1,5 @@
 import { FilterQuery, PopulateOptions } from 'mongoose';
-import workSpaceModel, { WorkspaceDocument, WorkspaceInput } from '../models/workspace/workspace.model';
+import workSpaceModel, { WorkspaceDocument, WorkspaceInput } from '../models/workspace.model';
 import { DBQueries } from '../types/util.types';
 
 export function createWorkSpace(doc: WorkspaceInput) {

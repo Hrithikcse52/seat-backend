@@ -1,5 +1,5 @@
 import { FilterQuery, PopulateOptions, UpdateQuery } from 'mongoose';
-import userModel, { UserDocument, UserInput } from '../models/users/user.model';
+import userModel, { UserDocument, UserInput } from '../models/user.model';
 
 export interface UserQueries {
   code: number;

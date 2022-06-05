@@ -1,7 +1,7 @@
 import { NextFunction, Response } from 'express';
 import { isEqual } from 'lodash';
-import { UserDocument } from '../models/users/user.model';
-import workSpaceModel from '../models/workspace/workspace.model';
+import { UserDocument } from '../models/user.model';
+import workSpaceModel from '../models/workspace.model';
 import { ReqMod } from '../types/util.types';
 import { handleAPIError } from '../utils/error.handler';
 

@@ -1,6 +1,6 @@
 import { FilterQuery, UpdateQuery, PopulateOptions } from 'mongoose';
 
-import blogModel, { BlogDocument, BlogInput } from '../models/blog/blog.model';
+import blogModel, { BlogDocument, BlogInput } from '../models/blog.model';
 
 export async function createBlog(doc: BlogInput) {
   try {

@@ -1,7 +1,7 @@
 import { CookieOptions, Response } from 'express';
 import { sign } from 'jsonwebtoken';
 import { isProd, ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from '../config';
-import { UserDocument } from '../models/users/user.model';
+import { UserDocument } from '../models/user.model';
 import { AccessTokenPayload, RefreshTokenPayload, Cookies } from '../types/token.types';
 
 enum TokenExpiration {
