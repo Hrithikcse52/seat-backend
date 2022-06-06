@@ -7,7 +7,7 @@ export function initializeSocket(msgSoc: Namespace<DefaultEventsMap, DefaultEven
     console.log('room: ', `${username}_${id}`);
     socket.join(`${username}_${id}`);
     console.log('consection sec', username, id);
-    socket.on('disconnect', (...args) => {
+    socket.on('disconnect', (args) => {
       console.log('discon args', args);
       socket.leave(`${username}_${id}`);
     });
