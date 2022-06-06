@@ -1,5 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
-import { UserDocument } from '../users/user.model';
+import { UserDocument } from './user.model';
 
 // interface PermType {
 //   user:

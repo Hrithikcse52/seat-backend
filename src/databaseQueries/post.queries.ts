@@ -1,5 +1,5 @@
 import { FilterQuery, UpdateQuery, PopulateOptions } from 'mongoose';
-import postModel, { PostDocument, PostInput } from '../models/post/post.model';
+import postModel, { PostDocument, PostInput } from '../models/post.model';
 
 export async function createPost(doc: PostInput) {
   try {

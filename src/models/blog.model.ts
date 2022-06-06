@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { Reaction, ReactionComment } from '../post/post.model';
+import { Reaction, ReactionComment } from './post.model';
 
 export interface BlogInput {
   blogDataHTML: string;

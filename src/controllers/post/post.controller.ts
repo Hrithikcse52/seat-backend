@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { UpdateQuery, FilterQuery } from 'mongoose';
 import { addReaction, createPost, getPost } from '../../databaseQueries/post.queries';
-import { PostDocument } from '../../models/post/post.model';
+import { PostDocument } from '../../models/post.model';
 import { ReqMod } from '../../types/util.types';
 import { handleAPIError } from '../../utils/error.handler';
 

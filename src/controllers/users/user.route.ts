@@ -2,6 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import { storage } from '../../lib/storage.lib';
 import { isAuth } from '../../middlewares/auth.middleware';
+import { sendMessage } from '../../sockets/msg.socket';
 import {
   checkUserController,
   createOG,
@@ -25,3 +26,9 @@ router.get('/refresh', refreshController);
 router.post('/edit', isAuth, upload.single('image'), editUserController);
 router.get('/check', isAuth, checkUserController);
 // router.get('/og', createOG);
+
+router.post('/sendmsg', (req, res) => {
+  const { user, id } = req.body;
+  const roomString = `${user}_${id}`;
+  sendMessage(roomString, 'hello');
+});

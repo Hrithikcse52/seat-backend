@@ -1,5 +1,5 @@
 import { FilterQuery, PopulateOptions, UpdateQuery } from 'mongoose';
-import userModel, { UserDocument, UserInput } from '../models/users/user.model';
+import userModel, { UserDocument, UserInput } from '../models/user.model';
 
 export interface UserQueries {
   code: number;
@@ -68,7 +68,6 @@ export async function getUser(
       query.select(select);
     }
     const data = await query.exec();
-    console.log('data user', data);
     if (data && data.length === 0) return { code: 206, data: null };
 
     return { code: 200, data: data[0] };
