@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { chatModel } from '../../models/chat.model';
 import { conversationModel } from '../../models/conversation.model';
+import { sendMessage } from '../../sockets/msg.socket';
 import { ReqMod } from '../../types/util.types';
 import { handleAPIError } from '../../utils/error.handler';
 
@@ -43,8 +44,8 @@ export async function getChatController(req: ReqMod, res: Response) {
 }
 
 export async function sendMessageController(req: ReqMod, res: Response) {
-  const { receiver, message, conversation } = req.body;
-  if (!(receiver && message && conversation)) {
+  const { receiver, receiverUsername, message, conversation } = req.body;
+  if (!(receiver && message && receiverUsername && conversation)) {
     return handleAPIError(res, null, 400, 'invalid request');
   }
   const { user } = req;
@@ -58,6 +59,6 @@ export async function sendMessageController(req: ReqMod, res: Response) {
     conversation,
   };
   const newChat = await chatModel.create(payload);
-
+  sendMessage(`${receiverUsername}_${receiver}`, newChat);
   return res.send(newChat);
 }

@@ -27,8 +27,8 @@ router.post('/edit', isAuth, upload.single('image'), editUserController);
 router.get('/check', isAuth, checkUserController);
 // router.get('/og', createOG);
 
-router.post('/sendmsg', (req, res) => {
-  const { user, id } = req.body;
-  const roomString = `${user}_${id}`;
-  sendMessage(roomString, 'hello');
-});
+// router.post('/sendmsg', (req, res) => {
+//   const { user, id } = req.body;
+//   const roomString = `${user}_${id}`;
+//   sendMessage(roomString, 'hello');
+// });
