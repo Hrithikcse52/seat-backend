@@ -13,6 +13,7 @@ import { router as metaRoute } from './controllers/meta/meta.route';
 import { router as blogRoute } from './controllers/blog/blog.route';
 import { router as postRoute } from './controllers/post/post.route';
 import { router as conversationRoute } from './controllers/message/message.route';
+import { router as algoRoute } from './controllers/algo/algo.route';
 
 server.use(cors({ credentials: true, origin: FRONT_END_URL }));
 server.use(express.json());
@@ -26,6 +27,7 @@ server.use('/meta', metaRoute);
 server.use('/blog', blogRoute);
 server.use('/post', postRoute);
 server.use('/conversation', conversationRoute);
+server.use('/algo', algoRoute);
 
 server.get('/', (req, res) => {
   res.send({ message: 'server is up and running' });

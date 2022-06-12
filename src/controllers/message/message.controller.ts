@@ -1,19 +1,11 @@
 import { Response } from 'express';
-import { isEqual, orderBy, sortBy } from 'lodash';
-import { Types } from 'mongoose';
-import { ChatDocument, chatModel } from '../../models/chat.model';
-import { ConversationDocument, conversationModel } from '../../models/conversation.model';
+import { isEqual, orderBy } from 'lodash';
+import { chatModel } from '../../models/chat.model';
+import { conversationModel } from '../../models/conversation.model';
 import { sendMessage } from '../../sockets/msg.socket';
 import { ReqMod } from '../../types/util.types';
 import { handleAPIError } from '../../utils/error.handler';
 import { getSocketRoom } from '../../utils/index.utils';
-
-function unique(array: any[], propertyName: string | number) {
-  return array.filter(
-    (e: { [x: string]: any }, i: any) =>
-      array.findIndex((a: { [x: string]: any }) => a[propertyName].toString() === e[propertyName].toString()) === i
-  );
-}
 
 export async function getConversationController(req: ReqMod, res: Response) {
   const { user } = req;
