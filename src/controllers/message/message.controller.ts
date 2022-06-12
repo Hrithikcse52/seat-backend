@@ -1,9 +1,19 @@
 import { Response } from 'express';
-import { chatModel } from '../../models/chat.model';
-import { conversationModel } from '../../models/conversation.model';
+import { isEqual, orderBy, sortBy } from 'lodash';
+import { Types } from 'mongoose';
+import { ChatDocument, chatModel } from '../../models/chat.model';
+import { ConversationDocument, conversationModel } from '../../models/conversation.model';
 import { sendMessage } from '../../sockets/msg.socket';
 import { ReqMod } from '../../types/util.types';
 import { handleAPIError } from '../../utils/error.handler';
+import { getSocketRoom } from '../../utils/index.utils';
+
+function unique(array: any[], propertyName: string | number) {
+  return array.filter(
+    (e: { [x: string]: any }, i: any) =>
+      array.findIndex((a: { [x: string]: any }) => a[propertyName].toString() === e[propertyName].toString()) === i
+  );
+}
 
 export async function getConversationController(req: ReqMod, res: Response) {
   const { user } = req;
@@ -12,9 +22,26 @@ export async function getConversationController(req: ReqMod, res: Response) {
   }
   const conversation = await conversationModel
     .find({ participants: { $in: user._id } })
-    .populate('participants', 'username name profileImg');
+    .populate('participants', 'username name profileImg')
+    .sort({ createdAt: -1 })
+    .lean();
 
-  return res.send(conversation);
+  const conversationId = conversation.map((conv) => conv._id);
+  console.log('conversation ids', conversationId);
+  const chats = await chatModel
+    .find({ conversation: { $in: conversationId } })
+    .sort({ createdAt: -1 })
+    .lean();
+
+  let modConversation = conversation.map((conv: any) => {
+    // eslint-disable-next-line no-param-reassign
+    conv.chat = chats.find((ch) => isEqual(ch.conversation, conv._id)) ?? {};
+    return conv;
+  });
+
+  console.log('conversations', conversation, modConversation);
+  modConversation = orderBy(modConversation, ['chat.createdAt'], ['desc']);
+  return res.send(modConversation);
 }
 
 export async function createConversationController(req: ReqMod, res: Response) {
@@ -39,7 +66,6 @@ export async function getChatController(req: ReqMod, res: Response) {
     return handleAPIError(res, null, 400, 'invalid request');
   }
   const chats = await chatModel.find({ conversation }).sort({ createdAt: 1 }).exec();
-  console.log('chats', chats, conversation);
   return res.send(chats);
 }
 
@@ -59,6 +85,7 @@ export async function sendMessageController(req: ReqMod, res: Response) {
     conversation,
   };
   const newChat = await chatModel.create(payload);
-  sendMessage(`${receiverUsername}_${receiver}`, newChat);
+  const roomName = getSocketRoom(receiverUsername as string, receiver as string);
+  sendMessage(roomName, newChat);
   return res.send(newChat);
 }
