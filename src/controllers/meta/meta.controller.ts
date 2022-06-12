@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getUser } from '../../databaseQueries/user.queries';
+import userModel from '../../models/user.model';
 import { handleAPIError } from '../../utils/error.handler';
 
 export async function getMetaProfile(req: Request, res: Response) {
@@ -16,4 +17,12 @@ export async function getMetaProfile(req: Request, res: Response) {
   } catch (err) {
     return handleAPIError(res, err, 500, 'Something went wrong');
   }
+}
+
+export async function getIndexUsers(req: Request, res: Response) {
+  const users = await userModel
+    .find({}, 'name username profileImg email workspace ogImage')
+    .limit(3)
+    .sort({ createdAt: 1 });
+  res.send(users);
 }
