@@ -10,7 +10,7 @@
     "watch-ts": "tsc -w",
     "watch": "rm -rvf dist && tsc -w",
     "start:prod": "node dist/index.js",
-    "start": "npm run build && npm run start:prod",
+    "start": "npm ci && npm run build && npm run start:prod",
     "dev": "nodemon dist/index.js",
     "check-types": "tsc --pretty --noEmit",
     "check-format": "prettier --check .",
