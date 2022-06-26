@@ -3,10 +3,9 @@
 import { Request, Response } from 'express';
 import { hash, compare } from 'bcrypt';
 import { CanvasRenderingContext2D, createCanvas, loadImage } from 'canvas';
-import fs, { createWriteStream } from 'fs';
-import path from 'path';
+import fs from 'fs';
 import { verify } from 'jsonwebtoken';
-import { FRONT_END_URL, REFRESH_TOKEN_SECRET, ROOT } from '../../config';
+import { FRONT_END_URL, REFRESH_TOKEN_SECRET } from '../../config';
 import { createUser, getUser, incTokenVersion, updateUser } from '../../databaseQueries/user.queries';
 import { clearTokens, buildTokens, setTokens } from '../../utils/token.utils';
 import { RefreshTokenPayload } from '../../types/token.types';

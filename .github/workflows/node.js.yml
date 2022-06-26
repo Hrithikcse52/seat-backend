@@ -28,7 +28,7 @@ jobs:
           echo "FRONT_END_URL=$FRONT_END_URL" >> .env
           echo "PORT=3000" >> .env
       - name: Installing packages
-        run: npm i
+        run: npm ci
       - name: Installing Test & Lint
         run: npm run test-all
       - name: build
