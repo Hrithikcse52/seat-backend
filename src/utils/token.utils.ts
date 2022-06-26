@@ -65,6 +65,8 @@ export function buildTokens(user: UserDocument) {
 export function clearTokens(res: Response) {
   // res.cookie(Cookies.AccessToken, '', { ...defaultCookieOptions, maxAge: 0 });
   // res.cookie(Cookies.RefreshToken, '', { ...defaultCookieOptions, maxAge: 0 });
-  res.clearCookie(Cookies.AccessToken, { path: defaultCookieOptions.path });
-  res.clearCookie(Cookies.RefreshToken, { path: defaultCookieOptions.path });
+  // res.clearCookie(Cookies.AccessToken, { path: defaultCookieOptions.path });
+  // res.clearCookie(Cookies.RefreshToken, { path: defaultCookieOptions.path });
+  res.clearCookie(Cookies.AccessToken, defaultCookieOptions);
+  res.clearCookie(Cookies.RefreshToken, defaultCookieOptions);
 }
