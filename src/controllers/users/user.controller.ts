@@ -19,6 +19,13 @@ export async function registerHandler(req: Request, res: Response) {
     if (!(firstName && lastName && email && password && username)) {
       return res.status(400).send({ message: 'improper query', data: null });
     }
+
+    const extUser = await getUser({ $or: [{ username }, { email }] });
+    console.log('ext user', extUser);
+    if (extUser.code !== 206) {
+      return handleAPIError(res, null, 403, 'user exists! try another username or email');
+    }
+
     const encryptPass = await hash(password, 10);
     const {
       code,
