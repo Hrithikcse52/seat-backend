@@ -14,10 +14,10 @@ const defaultCookieOptions: CookieOptions = {
   httpOnly: true,
   // strict only if backed is in same site like api.membook.me
   //  lax when backedn is on diffenret host
+  sameSite: isProd ? 'none' : 'lax',
 
-  sameSite: 'lax',
+  // sameSite: 'lax',
   secure: isProd,
-  // sameSite: isProd ? 'strict' : 'lax',
   // domain: FRONT_END_URL,
   path: '/',
 };
