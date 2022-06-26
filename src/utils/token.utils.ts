@@ -12,9 +12,12 @@ enum TokenExpiration {
 
 const defaultCookieOptions: CookieOptions = {
   httpOnly: true,
-  // sameSite: 'lax',
+  // strict only if backed is in same site like api.membook.me
+  //  lax when backedn is on diffenret host
+
+  sameSite: 'lax',
   secure: isProd,
-  sameSite: isProd ? 'strict' : 'lax',
+  // sameSite: isProd ? 'strict' : 'lax',
   // domain: FRONT_END_URL,
   path: '/',
 };
