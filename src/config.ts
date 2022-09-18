@@ -9,6 +9,8 @@ export const {
   // is prod
   SUPABASE_ANON,
   NODE_ENV,
+  EMAIL,
+  PASS,
 } = process.env;
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

