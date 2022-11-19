@@ -32,3 +32,5 @@ server.use('/algo', algoRoute);
 server.get('/', (req, res) => {
   res.send({ message: 'server is up and running' });
 });
+
+export { server };

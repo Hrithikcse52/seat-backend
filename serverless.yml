@@ -1,0 +1,23 @@
+service: api-membook
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+
+package:
+  individually: true
+  patterns:
+    - '!src/**'
+    # - src/function/handler.js
+
+functions:
+  api-membook:
+    handler: dist/handler.handler
+    events:
+      - httpApi: '*'
+
+plugins:
+  - serverless-offline
+  - serverless-dotenv-plugin
+  # - serverless-bundle

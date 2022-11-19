@@ -30,8 +30,8 @@ const io = new Server(httpServer, {
 const msgSoc = io.of('msg');
 initializeSocket(msgSoc);
 
-httpServer.listen(PORT, () => {
-  console.log(`server up and running at ${PORT}`);
-});
+// httpServer.listen(PORT, () => {
+//   console.log(`server up and running at ${PORT}`);
+// });
 
 export { server, httpServer, io, msgSoc };
