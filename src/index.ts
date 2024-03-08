@@ -15,7 +15,7 @@ import { router as postRoute } from './controllers/post/post.route';
 import { router as conversationRoute } from './controllers/message/message.route';
 import { router as algoRoute } from './controllers/algo/algo.route';
 
-server.use(cors({ credentials: true, origin: FRONT_END_URL }));
+server.use(cors({ credentials: true, origin: [FRONT_END_URL!, /\.hrithik\.dev$/] }));
 server.use(express.json());
 server.use(cookieParser());
 server.use(morgan('tiny'));
