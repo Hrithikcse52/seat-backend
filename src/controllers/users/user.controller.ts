@@ -291,7 +291,8 @@ export async function loginController(req: Request, res: Response) {
     }
 
     console.log('not user ');
-    return res.redirect(`${FRONT_END_URL}`);
+    // return res.redirect(`${FRONT_END_URL}`);
+    return res.status(400).send({ message: 'user email or password not match' });
   } catch (error) {
     console.log('error while logging user, user controller line 49', error);
     return res.status(500).send({ message: 'something went wrong', data: error });

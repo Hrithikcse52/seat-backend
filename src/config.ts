@@ -15,4 +15,4 @@ export const {
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 export const ROOT = __dirname;
-export const isProd = NODE_ENV! === 'production';
+export const isProd = NODE_ENV === 'production';
