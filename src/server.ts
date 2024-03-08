@@ -13,7 +13,7 @@ const httpServer = createServer(server);
 const io = new Server(httpServer, {
   /* options */
   cors: {
-    origin: [FRONT_END_URL!],
+    origin: [FRONT_END_URL!, /\.hrithik\.dev$/],
     methods: ['GET', 'POST'],
   },
 });
