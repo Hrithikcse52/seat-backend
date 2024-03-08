@@ -12,26 +12,31 @@ export async function sendMail({
   text: string;
   html: string;
 }) {
-  console.log('inside mailer', { to, subject, text, html });
-  const mailer = nodemailer.createTransport({
-    port: 465,
-    host: 'smtp.gmail.com',
-    auth: {
-      user: EMAIL,
-      pass: PASS,
-    },
-    secure: true,
-  });
+  try {
+    console.log('inside mailer', { to, subject, text, html });
+    const mailer = nodemailer.createTransport({
+      port: 465,
+      host: 'smtp.gmail.com',
+      auth: {
+        user: EMAIL,
+        pass: PASS,
+      },
+      secure: true,
+    });
 
-  const options = {
-    from: EMAIL,
-    cc: 'hrithik.cse52@gmail.com',
-    to,
-    subject,
-    text,
-    html,
-  };
-  const data = await mailer.sendMail(options);
-  console.log('data', data);
-  return data;
+    const options = {
+      from: EMAIL,
+      cc: 'hrithik.cse52@gmail.com',
+      to,
+      subject,
+      text,
+      html,
+    };
+    const data = await mailer.sendMail(options);
+    console.log('data', data);
+    return data;
+  } catch (error) {
+    console.log('error in mailer', error);
+    return undefined;
+  }
 }
