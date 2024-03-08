@@ -2,7 +2,6 @@
 /* eslint-disable no-param-reassign */
 import { Request, Response } from 'express';
 import { hash, compare } from 'bcrypt';
-import { CanvasRenderingContext2D, createCanvas, loadImage } from 'canvas';
 import fs from 'fs';
 import { verify } from 'jsonwebtoken';
 import { FRONT_END_URL, REFRESH_TOKEN_SECRET } from '../../config';
@@ -101,55 +100,55 @@ function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: num
   ctx.closePath();
 }
 
-export async function createOG(userImage: string, username: string) {
-  const canvas = createCanvas(1200, 630);
-  const ctx = canvas.getContext('2d');
-  const bgImage = await loadImage(
-    'https://us-central1-centered-1580668301240.cloudfunctions.net/randomPhoto?collectionId=j1fwrKAGDIg'
-  );
+// export async function createOG(userImage: string, username: string) {
+//   const canvas = createCanvas(1200, 630);
+//   const ctx = canvas.getContext('2d');
+//   const bgImage = await loadImage(
+//     'https://us-central1-centered-1580668301240.cloudfunctions.net/randomPhoto?collectionId=j1fwrKAGDIg'
+//   );
 
-  // center fill
-  const hRatio = canvas.width / bgImage.width;
-  const vRatio = canvas.height / bgImage.height;
-  const ratio = Math.max(hRatio, vRatio);
-  const centerShiftX = (canvas.width - bgImage.width * ratio) / 2;
-  const centerShiftY = (canvas.height - bgImage.height * ratio) / 2;
+//   // center fill
+//   const hRatio = canvas.width / bgImage.width;
+//   const vRatio = canvas.height / bgImage.height;
+//   const ratio = Math.max(hRatio, vRatio);
+//   const centerShiftX = (canvas.width - bgImage.width * ratio) / 2;
+//   const centerShiftY = (canvas.height - bgImage.height * ratio) / 2;
 
-  ctx.drawImage(
-    bgImage,
-    0,
-    0,
-    bgImage.width,
-    bgImage.height,
-    centerShiftX,
-    centerShiftY,
-    bgImage.width * ratio,
-    bgImage.height * ratio
-  );
+//   ctx.drawImage(
+//     bgImage,
+//     0,
+//     0,
+//     bgImage.width,
+//     bgImage.height,
+//     centerShiftX,
+//     centerShiftY,
+//     bgImage.width * ratio,
+//     bgImage.height * ratio
+//   );
 
-  ctx.rect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#000000aa';
-  ctx.fill();
+//   ctx.rect(0, 0, canvas.width, canvas.height);
+//   ctx.fillStyle = '#000000aa';
+//   ctx.fill();
 
-  const posterImage = await loadImage(userImage);
+//   const posterImage = await loadImage(userImage);
 
-  ctx.save();
+//   ctx.save();
 
-  roundedRect(ctx, 814, 51, 336, 528, 10);
+//   roundedRect(ctx, 814, 51, 336, 528, 10);
 
-  ctx.clip();
+//   ctx.clip();
 
-  ctx.drawImage(posterImage, 814, 51, 336, 528);
+//   ctx.drawImage(posterImage, 814, 51, 336, 528);
 
-  ctx.restore();
+//   ctx.restore();
 
-  const logoImage = await loadImage(
-    'https://wxmwctiasizeoqlubrjn.supabase.co/storage/v1/object/public/seat/logo/membook.svg'
-  );
+//   const logoImage = await loadImage(
+//     'https://wxmwctiasizeoqlubrjn.supabase.co/storage/v1/object/public/seat/logo/membook.svg'
+//   );
 
-  ctx.drawImage(logoImage, 121, 252, 462, 114);
-  return canvas.toBuffer();
-}
+//   ctx.drawImage(logoImage, 121, 252, 462, 114);
+//   return canvas.toBuffer();
+// }
 
 export async function editUserController(req: ReqMod, res: Response) {
   try {
@@ -183,19 +182,19 @@ export async function editUserController(req: ReqMod, res: Response) {
         return res.status(500).send({ message: 'Something went Wring', error });
       }
       updateDoc.profileImg = data.publicURL;
-      const ogImageFile = await createOG(updateDoc.profileImg, user.username);
+      // const ogImageFile = await createOG(updateDoc.profileImg, user.username);
 
-      const { data: ogData, error: ogErr } = await uploadImage(
-        'seat',
-        `ogImages/${`${user.username}_${user._id}`}/`,
-        `${Date.now()}_${user._id}`,
-        null,
-        ogImageFile
-      );
-      console.log('ogdata', ogData, ogErr);
-      if (ogData) {
-        updateDoc.ogImage = ogData.publicURL;
-      }
+      // const { data: ogData, error: ogErr } = await uploadImage(
+      //   'seat',
+      //   `ogImages/${`${user.username}_${user._id}`}/`,
+      //   `${Date.now()}_${user._id}`,
+      //   null,
+      //   ogImageFile
+      // );
+      // console.log('ogdata', ogData, ogErr);
+      // if (ogData) {
+      //   updateDoc.ogImage = ogData.publicURL;
+      // }
     }
     if (firstName || lastName) {
       updateDoc.name = {};

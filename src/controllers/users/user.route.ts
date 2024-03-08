@@ -2,10 +2,8 @@ import { Router } from 'express';
 import multer from 'multer';
 import { storage } from '../../lib/storage.lib';
 import { isAuth } from '../../middlewares/auth.middleware';
-import { sendMessage } from '../../sockets/msg.socket';
 import {
   checkUserController,
-  createOG,
   editUserController,
   loginController,
   logoutHandler,
